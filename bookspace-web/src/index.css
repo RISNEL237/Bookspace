@@ -1,0 +1,114 @@
+/* ============================================================
+   Feuille de style globale
+   ============================================================
+   Les 3 lignes ci-dessous chargent Tailwind CSS en 3 couches :
+   - base       : styles par défaut du navigateur, remis à zéro
+   - components : nos classes personnalisées définies plus bas
+                  (ex : .btn-primary, .card, .pill-success...)
+   - utilities  : toutes les classes utilitaires de Tailwind
+                  (bg-primary, p-4, flex, rounded, etc.)
+   ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #f5f6f2;
+  color: #1d2420;
+}
+
+/* Classes "raccourcis" réutilisables : au lieu de répéter 10 classes
+   Tailwind à chaque bouton, on écrit juste className="btn-primary" */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[8px] px-5 py-2.5 text-[13.5px] font-bold whitespace-nowrap transition-colors;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-light;
+  }
+  .btn-accent {
+    @apply btn bg-accent text-white hover:bg-accent-dark;
+  }
+  .btn-outline {
+    @apply btn bg-surface border border-borderStrong text-primary hover:bg-surfaceAlt;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-muted hover:bg-surfaceAlt;
+  }
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-xs rounded-[6px];
+  }
+  .btn-danger-outline {
+    @apply btn bg-danger-bg text-danger hover:opacity-80;
+  }
+  .btn-success-outline {
+    @apply btn bg-success-bg text-success hover:opacity-80;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide;
+  }
+  .pill-accent {
+    @apply pill bg-accent-pale text-accent-dark;
+  }
+  .pill-info {
+    @apply pill bg-info-bg text-info;
+  }
+  .pill-success {
+    @apply pill bg-success-bg text-success;
+  }
+  .pill-warning {
+    @apply pill bg-warning-bg text-warning;
+  }
+  .pill-danger {
+    @apply pill bg-danger-bg text-danger;
+  }
+  .pill-muted {
+    @apply pill bg-surfaceAlt text-muted;
+  }
+  .pill-dark {
+    @apply pill bg-primary text-white;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded shadow-card p-5;
+  }
+  .card-title {
+    @apply text-[15px] font-bold text-primary mb-1 flex items-center gap-2;
+  }
+  .card-sub {
+    @apply text-[12.5px] text-muted mb-4;
+  }
+
+  .field label {
+    @apply block text-[11.5px] font-bold text-muted uppercase tracking-wide mb-1.5;
+  }
+  .input {
+    @apply w-full rounded-[8px] border border-borderStrong bg-surface px-3.5 py-2.5 text-[13.5px] text-ink outline-none focus:border-primary;
+  }
+
+  .table-base {
+    @apply w-full border-collapse text-[13px];
+  }
+  .table-base th {
+    @apply text-left text-[10.5px] uppercase tracking-wide text-faint font-bold pb-2.5 px-3.5 border-b border-border;
+  }
+  .table-base td {
+    @apply p-3.5 border-b border-border align-middle;
+  }
+  .table-base tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .section-title {
+    @apply font-head text-[22px] font-bold text-primary;
+  }
+
+  .side-link {
+    @apply flex items-center gap-3 px-3.5 py-2.5 rounded-[9px] text-[13.5px] font-semibold text-muted hover:bg-surfaceAlt;
+  }
+  .side-link.active {
+    @apply bg-primary-pale text-primary;
+  }
+}
