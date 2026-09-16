@@ -1,4 +1,4 @@
-# BookSpace — Frontend Web (React)
+# 📖BookSpace — Frontend Web (React)
 
 Frontend web de la marketplace multi-vendeurs de livres papier & numériques,
 généré à partir des maquettes validées (thème « Slate & Sage »).
