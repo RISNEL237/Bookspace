@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { livres } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { Etoiles, FilAriane } from "../../components/ui/Composants";
+// Importation complète de toutes les icônes Lucide pour la fiche produit
+import { Book, Save, Store, ShoppingBag, Heart, Truck, Lock, ArrowRight } from "lucide-react";
 
 // PAGE : Fiche produit (/livre/:id)
 // Détail d'un livre : choix du format, ajout au panier, avis.
@@ -38,27 +40,41 @@ export default function FicheProduit() {
             Par <b className="text-primary">{book.author}</b> · <Etoiles rating={book.rating} /> ({book.reviews} avis) · Parution {book.published} · {book.pages} pages
           </div>
 
+          {/* Choix des formats avec icônes Lucide */}
           <div className="flex gap-3 my-5">
             <button
               onClick={() => setFormat("paper")}
-              className={`flex-1 text-left border-[1.5px] rounded p-4 ${format === "paper" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
+              className={`flex-1 text-left border-[1.5px] rounded p-4 flex flex-col justify-between ${format === "paper" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
             >
-              <div className="text-xs text-muted font-bold uppercase mb-1.5">📘 Livre broché</div>
-              <div className="font-head text-[22px] font-bold text-primary">{book.pricePaper.toFixed(2)} €</div>
+              <div>
+                <div className="text-xs text-muted font-bold uppercase mb-1.5 flex items-center gap-1.5">
+                  <Book size={14} className="text-primary" /> 
+                  <span>Livre broché</span>
+                </div>
+                <div className="font-head text-[22px] font-bold text-primary">{book.pricePaper.toFixed(2)} €</div>
+              </div>
               <div className="text-muted text-xs mt-1.5">Prix unique garanti — Loi Lang</div>
             </button>
             <button
               onClick={() => setFormat("ebook")}
-              className={`flex-1 text-left border-[1.5px] rounded p-4 ${format === "ebook" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
+              className={`flex-1 text-left border-[1.5px] rounded p-4 flex flex-col justify-between ${format === "ebook" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
             >
-              <div className="text-xs text-muted font-bold uppercase mb-1.5">💾 E-pub / PDF</div>
-              <div className="font-head text-[22px] font-bold text-primary">{book.priceEbook.toFixed(2)} €</div>
+              <div>
+                <div className="text-xs text-muted font-bold uppercase mb-1.5 flex items-center gap-1.5">
+                  <Save size={14} className="text-primary" /> 
+                  <span>E-pub / PDF</span>
+                </div>
+                <div className="font-head text-[22px] font-bold text-primary">{book.priceEbook.toFixed(2)} €</div>
+              </div>
               <div className="text-muted text-xs mt-1.5">Téléchargement immédiat</div>
             </button>
           </div>
 
+          {/* Encart Vendeur avec icône Store */}
           <div className="bg-surfaceAlt rounded p-4 flex items-center gap-3.5 my-4.5">
-            <div className="w-[38px] h-[38px] rounded-[10px] bg-primary text-white flex items-center justify-center shrink-0">🏬</div>
+            <div className="w-[38px] h-[38px] rounded-[10px] bg-primary text-white flex items-center justify-center shrink-0">
+              <Store size={18} />
+            </div>
             <div className="flex-1">
               <div className="font-bold text-sm">Vendu et expédié par {book.seller}</div>
               <div className="text-faint text-xs">{book.sellerCity} · ★ {book.rating} ({book.reviews} ventes)</div>
@@ -66,26 +82,41 @@ export default function FicheProduit() {
             <span className="pill-success">En stock</span>
           </div>
 
+          {/* Actions d'achat avec boutons interactifs */}
           <div className="flex items-center gap-4 my-5">
             <div className="flex items-center border border-borderStrong rounded-[8px] overflow-hidden text-sm">
-              <button onClick={() => definirQuantite(Math.max(1, quantite - 1))} className="w-[34px] h-[34px] font-bold text-muted">–</button>
+              <button onClick={() => definirQuantite(Math.max(1, quantite - 1))} className="w-[34px] h-[34px] font-bold text-muted hover:bg-surfaceAlt transition-colors">–</button>
               <span className="w-9 text-center font-bold">{quantite}</span>
-              <button onClick={() => definirQuantite(quantite + 1)} className="w-[34px] h-[34px] font-bold text-muted">+</button>
+              <button onClick={() => definirQuantite(quantite + 1)} className="w-[34px] h-[34px] font-bold text-muted hover:bg-surfaceAlt transition-colors">+</button>
             </div>
-            <button className="btn-primary flex-1">
-              🛍️ Ajouter au panier — {(format === "paper" ? book.pricePaper : book.priceEbook).toFixed(2)} €
+            <button className="btn-primary flex-1 flex items-center justify-center gap-2">
+              <ShoppingBag size={18} />
+              <span>Ajouter au panier — {(format === "paper" ? book.pricePaper : book.priceEbook).toFixed(2)} €</span>
             </button>
-            <button className="btn-outline">🤍</button>
+            <button className="btn-outline flex items-center justify-center p-2 hover:text-rose-500 hover:border-rose-300 transition-colors">
+              <Heart size={20} />
+            </button>
           </div>
-          <div className="text-sm text-muted">
-            🚚 Livraison à domicile sous 48h ou retrait gratuit en librairie · 🔒 Paiement sécurisé
+          
+          {/* Ligne de réassurance avec icônes discrètes */}
+          <div className="text-sm text-muted flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="flex items-center gap-1.5">
+              <Truck size={16} className="text-faint" /> 
+              Livraison sous 48h ou retrait gratuit
+            </span>
+            <span className="text-borderStrong">•</span>
+            <span className="flex items-center gap-1.5">
+              <Lock size={16} className="text-emerald-600" /> 
+              Paiement sécurisé
+            </span>
           </div>
         </div>
       </div>
 
+      {/* Onglets de spécifications */}
       <div className="flex gap-7 border-b border-border mx-10 mt-9 text-sm">
         {["Résumé de l'œuvre", "Spécifications", `Avis (${book.reviews})`, "L'autrice"].map((t, i) => (
-          <div key={t} className={`py-3 font-bold ${i === 0 ? "text-primary border-b-2 border-accent" : "text-faint"}`}>
+          <div key={t} className={`py-3 font-bold cursor-pointer ${i === 0 ? "text-primary border-b-2 border-accent" : "text-faint"}`}>
             {t}
           </div>
         ))}
@@ -98,13 +129,16 @@ export default function FicheProduit() {
             <div className="section-title text-base mb-3">Livres du même auteur</div>
             <div className="flex gap-4 flex-wrap">
               {livres.filter((b) => b.author === book.author && b.id !== book.id).map((b) => (
-                <Link key={b.id} to={`/livre/${b.id}`} className="text-sm font-bold text-accent-dark">
-                  {b.title} →
+                <Link key={b.id} to={`/livre/${b.id}`} className="text-sm font-bold text-accent-dark flex items-center gap-1 hover:underline">
+                  <span>{b.title}</span>
+                  <ArrowRight size={14} />
                 </Link>
               ))}
             </div>
           </div>
         </div>
+        
+        {/* Table de spécifications techniques */}
         <div className="w-full md:w-[320px] shrink-0">
           <div className="card">
             <div className="card-title">Spécifications</div>

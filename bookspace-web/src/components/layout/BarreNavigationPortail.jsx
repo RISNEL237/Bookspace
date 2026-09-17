@@ -1,3 +1,4 @@
+import { BookOpen } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -7,7 +8,7 @@ export function BarreNavigationPortail({ dark = "bg-primary", portalName, badge,
   return (
     <div className={`${dark} px-8 py-4 flex items-center`}>
       <Link to="/" className="font-head text-white text-xl font-bold flex items-center gap-2">
-        📖 BookSpace
+        <BookOpen /> BookSpace
         <span className="font-body text-white/60 font-medium text-sm ml-1.5">
           {portalName}
         </span>

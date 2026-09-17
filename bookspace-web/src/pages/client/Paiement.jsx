@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
+import { CreditCard, Shuffle, Smartphone, Wallet } from "lucide-react";
 
 // PAGE : Paiement sécurisé (/paiement)
 // Saisie de la carte + répartition transparente entre les vendeurs.
@@ -37,7 +38,7 @@ export default function Paiement() {
             automatique.
           </div>
           <div className="flex gap-3 mb-5">
-            {[["card", "💳 Carte bancaire"], ["mobile", "📱 Paiement mobile"], ["paypal", "🅿️ PayPal"]].map(([k, l]) => (
+            {[["card", <><CreditCard size={18} className="text-blue-500" /> Carte bancaire</>],["mobile", <><Smartphone size={18} className="text-emerald-500" /> Paiement mobile</>],["paypal", <><Wallet size={18} className="text-amber-500" /> PayPal</>]].map(([k, l]) => (
               <button
                 key={k}
                 onClick={() => definirMethode(k)}
@@ -68,7 +69,7 @@ export default function Paiement() {
               <input className="input" defaultValue="Éléonore de Montalembert" />
             </div>
             <button onClick={() => navigate("/commande/confirmation")} className="btn-primary w-full py-4 mt-1.5">
-              🔒 Confirmer le paiement de {total.toFixed(2)} €
+              <Lock size={18} strokeWidth={2} className="text-amber-500" /> Confirmer le paiement de {total.toFixed(2)} €
             </button>
             <div className="flex gap-2.5 mt-4 justify-center">
               {["PCI-DSS Niveau 1", "Chiffrement AES-256", "3-D Secure"].map((p) => (
@@ -80,7 +81,7 @@ export default function Paiement() {
 
         <div className="flex-1">
           <div className="card">
-            <div className="card-title">🔀 Transparence de la transaction</div>
+            <div className="card-title"><Shuffle /> Transparence de la transaction</div>
             <div className="card-sub">Paiement unique, réparti automatiquement entre 2 vendeurs</div>
             <div className="bg-primary rounded p-4.5 text-white mb-4">
               <div className="text-sm opacity-75">Montant total débité</div>

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+import { FaApple } from "react-icons/fa";
 
 // PAGE : Connexion / Inscription (/login)
 // Bascule entre l'espace client et l'espace vendeur.
@@ -47,12 +49,14 @@ export default function Connexion() {
             </button>
           </div>
 
-          <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-2.5">
-            🔵 Continuer avec Google
-          </button>
-          <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-5">
-            🍎 Continuer avec Apple
-          </button>
+          <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-2.5 hover:bg-surfaceAlt transition-colors">
+        <FcGoogle size={18} />
+        <span>Continuer avec Google</span>
+      </button>
+      <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-5 hover:bg-surfaceAlt transition-colors">
+        <FaApple size={18} className="text-ink" />
+        <span>Continuer avec Apple</span>
+      </button>
           <div className="flex items-center gap-3 text-[11.5px] text-faint mb-5">
             <div className="flex-1 h-px bg-border" /> OU PAR E-MAIL
             <div className="flex-1 h-px bg-border" />

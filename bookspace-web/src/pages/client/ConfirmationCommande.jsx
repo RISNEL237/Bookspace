@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
+import { BookOpen, PackageSearch } from "lucide-react";
 
 // PAGE : Confirmation de commande (/commande/confirmation)
 // Affichée juste après un paiement réussi.
@@ -34,13 +35,16 @@ export default function ConfirmationCommande() {
         </div>
 
         <div className="flex gap-3 justify-center">
-          <Link to="/compte/bibliotheque" className="btn-accent">
-            📖 Ouvrir ma bibliothèque
+          <Link to="/compte/bibliotheque" className="btn-accent flex items-center gap-2">
+              <BookOpen size={16} />
+              <span>Ouvrir ma bibliothèque</span>
           </Link>
-          <Link to="/compte/commandes" className="btn-outline">
-            Suivre ma commande
+          <Link to="/compte/commandes" className="btn-outline flex items-center gap-2">
+              <PackageSearch size={16} className="text-current" />
+              <span>Suivre ma commande</span>
           </Link>
         </div>
+
       </div>
     </div>
   );

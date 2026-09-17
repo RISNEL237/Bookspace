@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import React from "react";
 
 // PAGE : Paramètres et sécurité du compte (/compte/parametres)
@@ -52,7 +53,7 @@ export default function ParametresCompte() {
 
         <div className="w-full md:w-[320px] shrink-0 space-y-5">
           <div className="card">
-            <div className="card-title">🔐 Double authentification</div>
+            <div className="card-title"><Lock size={18} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" /> Double authentification</div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted">SMS / App (+33 6 42 ** 12)</span>
               <span className="pill-success">Active</span>

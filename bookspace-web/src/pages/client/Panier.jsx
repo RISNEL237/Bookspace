@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { FilAriane } from "../../components/ui/Composants";
+import { Shuffle, Save, Book, Heart, Trash2, ArrowLeft, Lock } from "lucide-react";
 
 // PAGE : Panier d'achat (/panier)
 // Regroupe les articles papier et numériques avant paiement.
@@ -23,8 +24,11 @@ export default function Panier() {
             votre bibliothèque.
           </div>
 
+          {/* Bannière d'information avec l'icône Shuffle stylisée */}
           <div className="bg-info-bg rounded p-3.5 flex items-center gap-3 mb-5 text-[12.5px]">
-            <div className="w-[38px] h-[38px] rounded-[10px] bg-info-bg text-info flex items-center justify-center text-base shrink-0">🔀</div>
+            <div className="w-[38px] h-[38px] rounded-[10px] bg-info-bg text-info flex items-center justify-center shrink-0">
+              <Shuffle size={18} strokeWidth={2.5} />
+            </div>
             <div>
               <b>Commande hybride groupée</b> — 1 envoi postal + 1
               téléchargement instantané, réglés en un seul paiement.
@@ -42,33 +46,48 @@ export default function Panier() {
                   </div>
                   <div className="font-head text-[17px] font-bold text-primary">{item.price.toFixed(2)} €</div>
                 </div>
-                <div className="text-xs text-muted mb-2.5">
-                  <span className={item.format.includes("E-pub") ? "pill-info" : "pill-accent"}>
-                    {item.format.includes("E-pub") ? "💾" : "📘"} {item.format}
+                
+                <div className="text-xs text-muted mb-2.5 flex items-center gap-2">
+                  <span className={`pill-${item.format.includes("E-pub") ? "info" : "accent"} flex items-center gap-1`}>
+                    {item.format.includes("E-pub") ? (
+                      <Save size={12} strokeWidth={2.5} />
+                    ) : (
+                      <Book size={12} strokeWidth={2.5} />
+                    )} 
+                    {item.format}
                   </span>{" "}
-                  &nbsp; Vendu par <b>{item.seller}</b>
+                  <span>&nbsp; Vendu par <b>{item.seller}</b></span>
                 </div>
+
                 <div className="flex justify-between items-center mt-3">
                   {item.format.includes("E-pub") ? (
                     <div className="text-sm text-muted">Licence d'usage perpétuelle · 1 exemplaire</div>
                   ) : (
                     <div className="flex items-center border border-borderStrong rounded-[7px] overflow-hidden text-xs">
-                      <button className="w-[26px] h-[26px] font-bold text-muted">–</button>
+                      <button className="w-[26px] h-[26px] font-bold text-muted hover:bg-surfaceAlt transition-colors">–</button>
                       <span className="w-7 text-center font-bold">{item.qty}</span>
-                      <button className="w-[26px] h-[26px] font-bold text-muted">+</button>
+                      <button className="w-[26px] h-[26px] font-bold text-muted hover:bg-surfaceAlt transition-colors">+</button>
                     </div>
                   )}
+                  
+                  {/* Liens d'action convertis en boutons cliquables avec effet hover */}
                   <div className="flex gap-4 text-xs text-muted font-semibold">
-                    <span>🤍 Favoris</span>
-                    <span>🗑 Supprimer</span>
+                    <button className="flex items-center gap-1 hover:text-rose-500 transition-colors">
+                      <Heart size={14} />
+                      <span>Favoris</span>
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-rose-600 transition-colors">
+                      <Trash2 size={14} />
+                      <span>Supprimer</span>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           ))}
 
-          <Link to="/catalogue" className="btn-outline">
-            ← Continuer mes découvertes
+          <Link to="/catalogue" className="btn-outline inline-flex items-center gap-2 mt-2">
+            <ArrowLeft size={16} /> Continuer mes découvertes
           </Link>
         </div>
 
@@ -92,9 +111,12 @@ export default function Panier() {
               <span>Montant total TTC</span>
               <span>{total.toFixed(2)} €</span>
             </div>
-            <Link to="/paiement" className="btn-primary w-full mt-4.5 py-3.5">
-              🔒 Procéder au paiement sécurisé
+            
+            <Link to="/paiement" className="btn-primary w-full mt-4.5 py-3.5 flex items-center justify-center gap-2">
+              <Lock size={16} strokeWidth={2.5} />
+              <span>Procéder au paiement sécurisé</span>
             </Link>
+            
             <div className="flex gap-2.5 mt-4">
               {["CB", "VISA", "Mastercard", "Apple Pay"].map((p) => (
                 <div key={p} className="border border-border rounded-[6px] px-2.5 py-1.5 text-[11px] font-bold text-muted">

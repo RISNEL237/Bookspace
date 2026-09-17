@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { commandesClient, bibliothequeNumerique } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { CarteIndicateur } from "../../components/ui/Composants";
+// Import complet de toutes les icônes nécessaires
+import { Folder, Lock, MapPinCheck, Package, FolderHeart, Gift, Smile, BookOpenText, Check } from "lucide-react";
 
 // PAGE : Vue d'ensemble du compte client (/compte)
 // Résume les commandes en cours et la bibliothèque numérique.
@@ -11,28 +13,44 @@ export default function TableauDeBordCompte() {
     <div>
       <div className="flex justify-between items-start mb-6">
         <div>
-          <div className="section-title">Bonjour, Éléonore 👋</div>
+          <div className="section-title flex items-center gap-2">
+            Bonjour, Éléonore <Smile size={20} className="text-amber-500" />
+          </div>
           <div className="text-muted text-sm mt-1">
             Accédez à vos lectures en cours, vos envois postaux et vos
             garanties bibliophiles.
           </div>
         </div>
-        <Link to="/compte/bibliotheque" className="btn-accent">
-          📖 Accéder au lecteur web
+        <Link to="/compte/bibliotheque" className="btn-accent flex items-center gap-2">
+          <BookOpenText size={16} /> Accéder au lecteur web
         </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <CarteIndicateur label="Commandes en cours 📦" value="3" foot="1 colis en transit" />
-        <CarteIndicateur label="Bibliothèque numérique 📚" value="6" foot="Tatouage ePub sécurisé" />
-        <CarteIndicateur label="Crédit fidélité 🎁" value="12,50 €" foot="Applicable à la prochaine commande" />
+        <CarteIndicateur 
+          label={<span className="flex items-center gap-1.5"><Package size={16} className="text-faint" /> Commandes en cours</span>} 
+          value="3" 
+          foot="1 colis en transit" 
+        />
+        <CarteIndicateur 
+          label={<span className="flex items-center gap-1.5"><FolderHeart size={16} className="text-faint" /> Bibliothèque numérique</span>} 
+          value="6" 
+          foot="Tatouage ePub sécurisé" 
+        />
+        <CarteIndicateur 
+          label={<span className="flex items-center gap-1.5"><Gift size={16} className="text-faint" /> Crédit fidélité</span>} 
+          value="12,50 €" 
+          foot="Applicable à la prochaine commande" 
+        />
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 mt-6 items-start">
         <div className="flex-[1.5] w-full space-y-5">
           <div className="card">
             <div className="flex justify-between items-center mb-3.5">
-              <div className="card-title mb-0">📦 Suivi de mes commandes physiques</div>
+              <div className="card-title mb-0 flex items-center gap-2">
+                <Package size={18} className="text-faint" /> Suivi de mes commandes physiques
+              </div>
               <Link to="/compte/commandes" className="text-sm font-bold text-accent-dark">
                 Voir tout l'historique
               </Link>
@@ -55,7 +73,10 @@ export default function TableauDeBordCompte() {
 
           <div className="card">
             <div className="flex justify-between items-center mb-1">
-              <div className="card-title mb-0">📚 Ma bibliothèque numérique</div>
+              <div className="card-title mb-0 flex items-center gap-2">
+                <Folder size={18} strokeWidth={2} className="text-blue-500" /> 
+                <span>Ma bibliothèque numérique</span>
+              </div>
               <Link to="/compte/bibliotheque" className="text-sm font-bold text-accent-dark">
                 Voir les 6 titres
               </Link>
@@ -78,7 +99,9 @@ export default function TableauDeBordCompte() {
 
         <div className="w-full md:w-[320px] shrink-0 space-y-5">
           <div className="card">
-            <div className="card-title">🔐 Sécurité du compte</div>
+            <div className="card-title flex items-center gap-2">
+              <Lock size={18} className="text-faint" /> Sécurité du compte
+            </div>
             <div className="flex justify-between text-sm mb-2.5">
               <span className="text-muted">Double authentification</span>
               <span className="pill-success">Active</span>
@@ -87,12 +110,15 @@ export default function TableauDeBordCompte() {
               <span className="text-muted">Dernière connexion</span>
               <span className="font-bold">Aujourd'hui, 14:15</span>
             </div>
-            <Link to="/compte/parametres" className="btn-outline btn-sm w-full">
+            <Link to="/compte/parametres" className="btn-outline btn-sm w-full text-center block">
               Modifier mon mot de passe
             </Link>
           </div>
+          
           <div className="card">
-            <div className="card-title">📍 Adresse de livraison</div>
+            <div className="card-title flex items-center gap-2">
+              <MapPinCheck size={18} className="text-emerald-600" /> Adresse de livraison
+            </div>
             <div className="text-muted text-sm leading-relaxed">
               Éléonore de Montalembert
               <br />
@@ -100,7 +126,9 @@ export default function TableauDeBordCompte() {
               <br />
               75006 Paris, France
             </div>
-            <span className="pill-success mt-2.5 inline-block">✓ Adresse par défaut</span>
+            <span className="pill-success mt-2.5 inline-flex items-center gap-1">
+              <Check size={12} /> Adresse par défaut
+            </span>
           </div>
         </div>
       </div>

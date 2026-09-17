@@ -2,16 +2,17 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import BarreNavigationClient from "../components/layout/BarreNavigationClient";
 import MenuLateral from "../components/layout/MenuLateral";
+import { FolderIcon, Heart, LayoutGrid, MapPin, Settings, ShoppingBag } from "lucide-react";
 
 // Disposition de l'espace "Mon compte" : barre de navigation
 // + menu latéral du compte + contenu de la page.
 const links = [
-  { to: "/compte", end: true, icon: "▦", label: "Vue d'ensemble" },
-  { to: "/compte/commandes", icon: "📦", label: "Mes commandes" },
-  { to: "/compte/bibliotheque", icon: "📚", label: "Ma bibliothèque numérique" },
-  { to: "/compte/envies", icon: "📑", label: "Liste d'envies" },
-  { to: "/compte/adresses", icon: "📍", label: "Adresses & relais" },
-  { to: "/compte/parametres", icon: "⚙️", label: "Préférences & sécurité" },
+  { to: "/compte", end: true, icon: <><LayoutGrid /></>, label: "Vue d'ensemble" },
+  { to: "/compte/commandes", icon: <><ShoppingBag /></>, label: "Mes commandes" },
+  { to: "/compte/bibliotheque", icon: <><FolderIcon /></>, label: "Ma bibliothèque numérique" },
+  { to: "/compte/envies", icon: <><Heart /></>, label: "Liste d'envies" },
+  { to: "/compte/adresses", icon: <><MapPin /></>, label: "Adresses & relais" },
+  { to: "/compte/parametres", icon: <><Settings /></>, label: "Préférences & sécurité" },
 ];
 
 export default function DispositionCompte() {

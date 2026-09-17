@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { livres } from "../../lib/donnees";
 import { CarteLivreGrille } from "../../components/livres/CartesLivres";
+import { BookOpen, Store, BookCopy, Lock, Scale, ArrowRight, Zap, ShieldCheck } from "lucide-react";
 
 // PAGE : Accueil du site (/)
 // Vitrine, meilleures ventes et arguments de confiance.
@@ -11,7 +12,7 @@ export default function Accueil() {
       <div className="bg-primary text-white px-16 py-16 relative overflow-hidden">
         <div className="max-w-[680px] relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 px-3.5 py-1.5 rounded-full text-[11.5px] font-bold mb-5">
-            📚 Plateforme littéraire hybride
+            <BookOpen size={14} /> Plateforme littéraire hybride
           </div>
           <h1 className="font-head text-[42px] leading-tight font-bold mb-4">
             Le livre papier et numérique,
@@ -33,15 +34,16 @@ export default function Accueil() {
         </div>
       </div>
 
+      {/* Barre des indicateurs de confiance */}
       <div className="bg-surface border-b border-border px-16 py-5 flex flex-wrap gap-6">
         {[
-          ["🏬", "+120", "Librairies partenaires"],
-          ["📖", "50 000+", "Titres papier & numérique"],
-          ["🔒", "DRM social", "Fichiers protégés & tatoués"],
-          ["⚖️", "Prix unique", "Conforme à la réglementation"],
-        ].map(([icon, val, label]) => (
-          <div key={label} className="flex-1 min-w-[200px] flex gap-3 items-center">
-            <div className="icon-circle w-[38px] h-[38px] rounded-[10px] bg-accent-pale text-accent-dark flex items-center justify-center text-base shrink-0">
+          [<><Store size={18} /></>, "+120", "Librairies partenaires"],
+          [<><BookCopy size={18} /></>, "50 000+", "Titres papier & numérique"],
+          [<><Lock size={18} /></>, "DRM social", "Fichiers protégés & tatoués"],
+          [<><Scale size={18} /></>, "Prix unique", "Conforme à la réglementation"],
+        ].map(([icon, val, label], index) => (
+          <div key={index} className="flex-1 min-w-[200px] flex gap-3 items-center">
+            <div className="icon-circle w-[38px] h-[38px] rounded-[10px] bg-accent-pale text-accent-dark flex items-center justify-center shrink-0">
               {icon}
             </div>
             <div>
@@ -60,8 +62,9 @@ export default function Accueil() {
               Disponibles en livraison libraire ou en téléchargement immédiat
             </div>
           </div>
-          <Link to="/catalogue" className="btn-outline btn-sm">
-            Voir toute la sélection →
+          <Link to="/catalogue" className="btn-outline btn-sm inline-flex items-center gap-1.5">
+            <span>Voir toute la sélection</span>
+            <ArrowRight size={14} />
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -71,16 +74,17 @@ export default function Accueil() {
         </div>
       </div>
 
+      {/* Section Arguments "Pourquoi choisir BookSpace ?" */}
       <div className="px-16 pb-14">
         <div className="section-title mb-6">Pourquoi choisir BookSpace ?</div>
         <div className="grid md:grid-cols-3 gap-5">
           {[
-            ["🏪", "Soutien aux librairies", "Chaque commande papier est préparée et expédiée par une librairie indépendante."],
-            ["⚡", "Lecture immédiate", "Vos e-livres sont ajoutés en un instant à votre bibliothèque cloud sécurisée."],
-            ["🛡️", "Transactions sécurisées", "Paiement chiffré et répartition automatique entre les vendeurs."],
-          ].map(([icon, title, text]) => (
-            <div key={title} className="card">
-              <div className="w-[38px] h-[38px] rounded-[10px] bg-accent-pale text-accent-dark flex items-center justify-center text-base mb-3.5">
+            [<><Store size={18} /></>, "Soutien aux librairies", "Chaque commande papier est préparée et expédiée par une librairie indépendante."],
+            [<><Zap size={18} /></>, "Lecture immédiate", "Vos e-livres sont ajoutés en un instant à votre bibliothèque cloud sécurisée."],
+            [<><ShieldCheck size={18} /></>, "Transactions sécurisées", "Paiement chiffré et répartition automatique entre les vendeurs."],
+          ].map(([icon, title, text], index) => (
+            <div key={index} className="card">
+              <div className="w-[38px] h-[38px] rounded-[10px] bg-accent-pale text-accent-dark flex items-center justify-center mb-3.5">
                 {icon}
               </div>
               <div className="font-bold mb-1.5">{title}</div>

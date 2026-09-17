@@ -1,3 +1,4 @@
+import { Info, Lock } from "lucide-react";
 import React, { useState } from "react";
 
 // PAGE : Ajouter un ouvrage (/vendeur/livres/nouveau)
@@ -89,7 +90,7 @@ export default function AjouterLivre() {
             </div>
           </div>
           <div className="border-2 border-dashed border-borderStrong rounded bg-surfaceAlt p-5 text-center">
-            <div className="text-2xl mb-1.5">☁️</div>
+            <div className="text-2xl mb-1.5">{<Lock size={12} className="text-current" />}</div>
             <div className="text-sm font-bold">Téléverser le fichier source (.epub, .pdf)</div>
             <div className="text-faint text-xs mt-1">Glissez votre fichier ici — 50 Mo max</div>
           </div>
@@ -98,7 +99,7 @@ export default function AjouterLivre() {
 
       <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 items-start sm:items-center">
         <div className="text-muted text-sm">
-          ℹ️ Indexation immédiate sur la place de marché dès validation de
+          {<Info size={12} className="text-blue-500" />}Indexation immédiate sur la place de marché dès validation de
           l'ISBN.
         </div>
         <div className="flex gap-3">

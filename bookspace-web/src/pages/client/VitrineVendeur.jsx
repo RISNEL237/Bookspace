@@ -2,6 +2,7 @@ import React from "react";
 import { livres } from "../../lib/donnees";
 import { CarteLivreGrille } from "../../components/livres/CartesLivres";
 import { FilAriane } from "../../components/ui/Composants";
+import { HousePlus } from "lucide-react";
 
 // PAGE : Vitrine publique d'un vendeur (/librairie/:id)
 // Présente une librairie/éditeur et son catalogue.
@@ -13,7 +14,7 @@ export default function VitrineVendeur() {
       <FilAriane items={[{ label: "Accueil", to: "/" }, { label: "Librairies partenaires", to: "/catalogue" }, { label: "Librairie Delamain" }]} />
       <div className="px-10 pt-6">
         <div className="bg-primary rounded-lg p-8 text-white flex items-center gap-6">
-          <div className="w-16 h-16 rounded-lg bg-white/15 flex items-center justify-center text-2xl">🏬</div>
+          <div className="w-16 h-16 rounded-lg bg-white/15 flex items-center justify-center text-2xl"><HousePlus /></div>
           <div className="flex-1">
             <div className="font-head text-2xl font-bold">Librairie Delamain</div>
             <div className="text-white/70 text-sm mt-1">

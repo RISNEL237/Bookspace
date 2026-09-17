@@ -1,10 +1,11 @@
+import { BookOpen, Check, CheckCircle2, FileText } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
 // PAGE : Inscription vendeur / vérification KYB (/vendeur/inscription)
 // Étape de dépôt des justificatifs avant activation du compte.
 const steps = [
-  { n: "✓", label: "Type de structure", done: true },
+  { n: <Check size={15} strokeWidth={2} />, label: "Type de structure", done: true },
   { n: "2", label: "Vérification (KYB)", on: true },
   { n: "3", label: "Compte de paiement" },
   { n: "4", label: "Catalogue initial" },
@@ -15,8 +16,7 @@ export default function InscriptionVendeur() {
     <div className="min-h-screen bg-bg">
       <div className="bg-surface border-b border-border px-8 py-4 flex items-center">
         <Link to="/" className="font-head text-xl font-bold text-primary flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-accent inline-block" />
-          BookSpace
+          <BookOpen /> BookSpace
           <span className="font-body text-muted font-medium text-sm ml-1.5">
             Rejoindre le réseau vendeurs
           </span>
@@ -71,14 +71,14 @@ export default function InscriptionVendeur() {
             <div className="card-title text-sm">Documents justificatifs</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center">✓</div>
+                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"><CheckCircle2 strokeWidth={2} /></div>
                 <div>
                   <div className="text-sm font-bold">Kbis (extrait)</div>
                   <div className="text-faint text-xs">Vérifié automatiquement</div>
                 </div>
               </div>
               <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center">✓</div>
+                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"><CheckCircle2 strokeWidth={2} /></div>
                 <div>
                   <div className="text-sm font-bold">RIB / IBAN</div>
                   <div className="text-faint text-xs">Format conforme</div>
@@ -86,7 +86,7 @@ export default function InscriptionVendeur() {
               </div>
             </div>
             <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center">📄</div>
+              <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center"><FileText /></div>
               <div>
                 <div className="text-sm font-bold">Pièce d'identité du gérant</div>
                 <div className="text-faint text-xs">Glissez un fichier PDF ou JPG — 10 Mo max</div>
