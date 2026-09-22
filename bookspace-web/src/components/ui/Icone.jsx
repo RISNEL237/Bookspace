@@ -4,7 +4,7 @@ import {
   Wallet, ShieldCheck, Flag, ScrollText, Lock, CloudUpload, FileText,
   CreditCard, Star, Clock, Check, Search, Heart, ShoppingCart, Store, Gift,
   GraduationCap, Zap, Scale, Palette, Landmark, Microscope, Baby, Image,
-  ShoppingBag, Smartphone, Download, Map, Shuffle, Trash2, ShieldLock,
+  ShoppingBag, Smartphone, Download, Map, Shuffle, Trash2, Shield,
   AlertTriangle, Menu, X, User, Sparkles, CircleDollarSign, CirclePlay,
 } from "lucide-react";
 
@@ -13,7 +13,7 @@ const ICONS = {
   Wallet, ShieldCheck, Flag, ScrollText, Lock, CloudUpload, FileText,
   CreditCard, Star, Clock, Check, Search, Heart, ShoppingCart, Store, Gift,
   GraduationCap, Zap, Scale, Palette, Landmark, Microscope, Baby, Image,
-  ShoppingBag, Smartphone, Download, Map, Shuffle, Trash2, ShieldLock,
+  ShoppingBag, Smartphone, Download, Map, Shuffle, Trash2, Shield,
   AlertTriangle, Menu, X, User, Sparkles, CircleDollarSign, CirclePlay,
 };
 
