@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Icone from "./Icone";
 
 // Composants d'interface réutilisés sur plusieurs pages :
 // CarteIndicateur (chiffre clé), Etoiles (note), FilAriane (navigation), EnteteSection (titre de page).
@@ -25,17 +26,18 @@ export function CarteIndicateur({ label, value, delta, foot, tone = "" }) {
 export function Etoiles({ rating }) {
   const full = Math.round(rating);
   return (
-    <span className="text-warning text-xs tracking-wide">
-      {"★".repeat(full)}
-      {"☆".repeat(5 - full)}{" "}
-      <span className="text-faint tracking-normal">{rating}</span>
+    <span className="text-warning text-xs tracking-wide inline-flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Icone key={i} name="Star" size={12} className={i < full ? "fill-current" : ""} />
+      ))}
+      <span className="text-faint tracking-normal ml-1">{rating}</span>
     </span>
   );
 }
 
 export function FilAriane({ items }) {
   return (
-    <div className="px-10 pt-4 text-[12.5px] text-faint flex gap-2 flex-wrap">
+    <div className="px-4 sm:px-6 lg:px-10 pt-4 text-[12.5px] text-faint flex gap-2 flex-wrap">
       {items.map((it, i) => (
         <span key={i} className="flex items-center gap-2">
           {it.to ? (

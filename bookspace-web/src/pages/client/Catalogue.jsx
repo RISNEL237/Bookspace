@@ -1,3 +1,4 @@
+import Icone from "../../components/ui/Icone";
 import React, { useState } from "react";
 import { livres } from "../../lib/donnees";
 import { CarteLivreResultat } from "../../components/livres/CartesLivres";
@@ -21,8 +22,8 @@ export default function Catalogue() {
   return (
     <div>
       <FilAriane items={[{ label: "Accueil", to: "/" }, { label: `Résultats pour « ${recherche} »` }]} />
-      <div className="flex gap-7 px-10 pt-6 pb-10">
-        <div className="w-[250px] shrink-0">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
+        <div className="w-full lg:w-[250px] shrink-0">
           <div className="card">
             <div className="mb-6">
               <h5 className="text-[11.5px] uppercase tracking-wide text-faint font-bold mb-3">Format</h5>
@@ -54,7 +55,7 @@ export default function Catalogue() {
           <div className="flex gap-2 flex-wrap mb-4">
             {["Roman historique", "Livre broché", "E-pub", "Français"].map((c) => (
               <div key={c} className="bg-surface border border-borderStrong rounded-full px-3.5 py-1.5 text-xs text-muted">
-                {c} ✕
+                <span>{c}</span><Icone name="X" size={13} />
               </div>
             ))}
           </div>
@@ -64,7 +65,7 @@ export default function Catalogue() {
             </div>
             <div className="pill-muted">Trier par : Pertinence ▾</div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {[...livres, ...livres].map((b, i) => (
               <CarteLivreResultat key={i} book={b} />
             ))}

@@ -1,7 +1,7 @@
+import Icone from "../../components/ui/Icone";
 import React from "react";
 import { Link } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
-import { BookOpen, PackageSearch } from "lucide-react";
 
 // PAGE : Confirmation de commande (/commande/confirmation)
 // Affichée juste après un paiement réussi.
@@ -11,7 +11,7 @@ export default function ConfirmationCommande() {
     <div className="flex-1 flex items-center justify-center px-6 py-16">
       <div className="max-w-[560px] w-full text-center">
         <div className="w-16 h-16 rounded-full bg-success-bg text-success flex items-center justify-center text-3xl mx-auto mb-6">
-          ✓
+          <Icone name="Check" size={30} />
         </div>
         <div className="section-title mb-2">Merci, votre commande est confirmée</div>
         <div className="text-muted text-sm mb-8">
@@ -35,16 +35,13 @@ export default function ConfirmationCommande() {
         </div>
 
         <div className="flex gap-3 justify-center">
-          <Link to="/compte/bibliotheque" className="btn-accent flex items-center gap-2">
-              <BookOpen size={16} />
-              <span>Ouvrir ma bibliothèque</span>
+          <Link to="/compte/bibliotheque" className="btn-accent">
+            <span className="inline-flex items-center gap-2"><Icone name="Library" size={16} /> Ouvrir ma bibliothèque</span>
           </Link>
-          <Link to="/compte/commandes" className="btn-outline flex items-center gap-2">
-              <PackageSearch size={16} className="text-current" />
-              <span>Suivre ma commande</span>
+          <Link to="/compte/commandes" className="btn-outline">
+            Suivre ma commande
           </Link>
         </div>
-
       </div>
     </div>
   );

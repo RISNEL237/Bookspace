@@ -1,4 +1,17 @@
-// le fichier presente les donnees mocks
+// ============================================================
+//  DONNÉES FACTICES (mock data)
+// ============================================================
+// Ce fichier centralise toutes les données affichées dans le site.
+// En attendant que le backend Laravel + PostgreSQL soit connecté,
+// on utilise ces tableaux (arrays) et constantes à la place d'un
+// vrai appel à une API.
+//
+// Remarque : les noms des CHAMPS à l'intérieur de chaque objet
+// (title, author, price...) restent volontairement en anglais,
+// car ce sont ces mêmes noms qui seront utilisés plus tard comme
+// colonnes de base de données et clés du JSON renvoyé par l'API
+// Laravel. Cela évitera une double traduction inutile.
+// ============================================================
 
 // Liste des identifiants de couverture disponibles (styles de fond)
 export const couvertures = ["cv1", "cv2", "cv3", "cv4", "cv5", "cv6"];
@@ -14,7 +27,9 @@ export const stylesCouvertures = {
   cv6: "from-[#6B6350] to-[#4A4434]",
 };
 
+// ------------------------------------------------------------
 // Catalogue principal des livres (papier + numérique)
+// ------------------------------------------------------------
 export const livres = [
   {
     id: "memoires-ombre",
@@ -122,8 +137,12 @@ export const livres = [
   },
 ];
 
+// ------------------------------------------------------------
 // Contenu du panier d'achat (page Panier + Paiement)
-// On réutilise un livre du catalogue (...livres[0])
+// On réutilise un livre du catalogue (...livres[0]) et on ajoute
+// les infos propres à la ligne de panier : format choisi, quantité,
+// prix retenu et frais de port.
+// ------------------------------------------------------------
 export const articlesPanier = [
   {
     ...livres[0],
@@ -199,8 +218,9 @@ export const adresses = [
   },
 ];
 
-
-// Donnees côté VENDEUR
+// ------------------------------------------------------------
+// Côté VENDEUR
+// ------------------------------------------------------------
 
 // Commandes physiques que le vendeur doit préparer/expédier
 export const commandesVendeur = [
@@ -229,8 +249,9 @@ export const versements = [
   { label: "Versement mars", date: "Prévu le 15 mars 2025", amount: "1 245 €", status: "pending" },
 ];
 
-
-// Donnees côté ADMINISTRATEUR
+// ------------------------------------------------------------
+// Côté ADMINISTRATEUR
+// ------------------------------------------------------------
 
 // Vendeurs en attente de validation (vérification KYB)
 export const vendeursEnAttente = [

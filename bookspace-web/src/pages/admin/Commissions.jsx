@@ -1,4 +1,4 @@
-import { Book, Save } from "lucide-react";
+import Icone from "../../components/ui/Icone";
 import React from "react";
 
 // PAGE : Commissions et règles de la marketplace (/admin/commissions)
@@ -19,7 +19,7 @@ export default function Commissions() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="card">
-          <div className="card-title"><Book />Commission — Livres physiques</div>
+          <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="BookOpen" size={17} /> Commission — Livres physiques</span></div>
           <div className="card-sub">Prélevée sur le montant HT versé au vendeur, hors frais d'expédition</div>
           <div className="font-head text-[34px] font-bold text-primary">10,0 %</div>
           <div className="h-2 rounded-full bg-surfaceAlt relative my-4">
@@ -31,7 +31,7 @@ export default function Commissions() {
           </div>
         </div>
         <div className="card">
-          <div className="card-title"><Save /> Commission — Livres numériques</div>
+          <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Download" size={17} /> Commission — Livres numériques</span></div>
           <div className="card-sub">Inclut le coût de distribution CDN et le tatouage DRM</div>
           <div className="font-head text-[34px] font-bold text-primary">20,0 %</div>
           <div className="h-2 rounded-full bg-surfaceAlt relative my-4">

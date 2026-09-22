@@ -1,3 +1,4 @@
+import Icone from "../../components/ui/Icone";
 import React from "react";
 import { bibliothequeNumerique } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
@@ -70,11 +71,11 @@ export default function BibliothequeNumerique() {
             </div>
           </div>
           <div className="card">
-            <div className="card-title">📲 Compatibilité liseuses</div>
+            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Smartphone" size={17} /> Compatibilité liseuses</span></div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {["Vivlio", "Kobo / Tolino", "Kindle (Send-to)", "Apple Books"].map((l) => (
                 <div key={l} className="flex items-center gap-1.5">
-                  <span className="text-success">✓</span> {l}
+                  <span className="text-success"><Icone name="Check" size={14} /></span> {l}
                 </div>
               ))}
             </div>

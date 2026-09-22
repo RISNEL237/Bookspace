@@ -1,3 +1,4 @@
+import Icone from "../../components/ui/Icone";
 import React from "react";
 import { vendeursEnAttente } from "../../lib/donnees";
 import { CarteIndicateur } from "../../components/ui/Composants";
@@ -19,14 +20,14 @@ export default function TableauDeBordAdmin() {
       </div>
 
       <div className="bg-warning-bg border border-[#ecd9ad] rounded p-3.5 flex items-center gap-3 mb-5 text-[12.5px]">
-        <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center">⚠️</div>
+        <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center"><Icone name="AlertTriangle" size={18} /></div>
         <div>
           <b>2 signalements critiques</b> nécessitent un arbitrage sous 24h —
           voir Modération & signalements.
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
         <CarteIndicateur label="Volume brut (GMV)" value="124 850 €" delta="↑18,4%" foot="vs mois précédent" />
         <CarteIndicateur label="Vendeurs actifs" value="86" foot="Librairies & éditeurs" />
         <CarteIndicateur label="Signalements actifs" value="2" foot="Sous enquête prioritaire" />

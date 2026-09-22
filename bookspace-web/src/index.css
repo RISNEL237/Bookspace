@@ -14,8 +14,8 @@
 
 html,
 body {
-  background: #f5f6f2;
-  color: #1d2420;
+  background: #faf8f6;
+  color: #1a1613;
 }
 
 /* Classes "raccourcis" réutilisables : au lieu de répéter 10 classes
@@ -29,6 +29,9 @@ body {
   }
   .btn-accent {
     @apply btn bg-accent text-white hover:bg-accent-dark;
+  }
+  .btn-success {
+    @apply btn bg-success text-white hover:opacity-90;
   }
   .btn-outline {
     @apply btn bg-surface border border-borderStrong text-primary hover:bg-surfaceAlt;

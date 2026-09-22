@@ -1,8 +1,8 @@
+import Icone from "../../components/ui/Icone";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
-import { CreditCard, Shuffle, Smartphone, Wallet } from "lucide-react";
 
 // PAGE : Paiement sécurisé (/paiement)
 // Saisie de la carte + répartition transparente entre les vendeurs.
@@ -13,24 +13,25 @@ export default function Paiement() {
 
   return (
     <div>
-      <div className="px-10 pt-5 flex gap-2.5 text-[12.5px] text-faint font-bold items-center">
+      <div className="px-4 sm:px-6 lg:px-10 pt-5 flex flex-wrap gap-x-2.5 gap-y-2 text-[11px] sm:text-[12.5px] text-faint font-bold items-center">
         <div className="flex items-center gap-2 text-ink">
-          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px]">✓</span>
+          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px] shrink-0"><Icone name="Check" size={12} /></span>
           Panier
         </div>
-        ———
+        <span className="hidden sm:inline">———</span>
         <div className="flex items-center gap-2 text-ink">
-          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px]">✓</span>
-          Livraison & coordonnées
+          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px] shrink-0"><Icone name="Check" size={12} /></span>
+          <span className="sm:hidden">Livraison</span>
+          <span className="hidden sm:inline">Livraison & coordonnées</span>
         </div>
-        ———
+        <span className="hidden sm:inline">———</span>
         <div className="flex items-center gap-2 text-primary">
-          <span className="w-[22px] h-[22px] rounded-full bg-primary text-white flex items-center justify-center text-[11px]">3</span>
+          <span className="w-[22px] h-[22px] rounded-full bg-primary text-white flex items-center justify-center text-[11px] shrink-0">3</span>
           Paiement sécurisé
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-7 px-10 pt-6 pb-10">
+      <div className="flex flex-col md:flex-row gap-7 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
         <div className="flex-[1.5]">
           <div className="section-title text-xl">Options de paiement</div>
           <div className="text-muted text-sm mb-5 mt-1">
@@ -38,13 +39,13 @@ export default function Paiement() {
             automatique.
           </div>
           <div className="flex gap-3 mb-5">
-            {[["card", <><CreditCard size={18} className="text-blue-500" /> Carte bancaire</>],["mobile", <><Smartphone size={18} className="text-emerald-500" /> Paiement mobile</>],["paypal", <><Wallet size={18} className="text-amber-500" /> PayPal</>]].map(([k, l]) => (
+            {[["card", "CreditCard", "Carte bancaire"], ["mobile", "Smartphone", "Paiement mobile"], ["paypal", "Wallet", "PayPal"]].map(([k, icon, l]) => (
               <button
                 key={k}
                 onClick={() => definirMethode(k)}
                 className={`flex-1 border-[1.5px] rounded p-3.5 text-center text-[12.5px] font-bold ${methode === k ? "border-primary bg-primary-pale text-primary" : "border-borderStrong text-muted"}`}
               >
-                {l}
+                <span className="inline-flex items-center justify-center gap-2"><Icone name={icon} size={16} /> {l}</span>
               </button>
             ))}
           </div>
@@ -69,7 +70,7 @@ export default function Paiement() {
               <input className="input" defaultValue="Éléonore de Montalembert" />
             </div>
             <button onClick={() => navigate("/commande/confirmation")} className="btn-primary w-full py-4 mt-1.5">
-              <Lock size={18} strokeWidth={2} className="text-amber-500" /> Confirmer le paiement de {total.toFixed(2)} €
+              <span className="inline-flex items-center justify-center gap-2"><Icone name="Lock" size={16} /> Confirmer le paiement de {total.toFixed(2)} €</span>
             </button>
             <div className="flex gap-2.5 mt-4 justify-center">
               {["PCI-DSS Niveau 1", "Chiffrement AES-256", "3-D Secure"].map((p) => (
@@ -81,7 +82,7 @@ export default function Paiement() {
 
         <div className="flex-1">
           <div className="card">
-            <div className="card-title"><Shuffle /> Transparence de la transaction</div>
+            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Shuffle" size={17} /> Transparence de la transaction</span></div>
             <div className="card-sub">Paiement unique, réparti automatiquement entre 2 vendeurs</div>
             <div className="bg-primary rounded p-4.5 text-white mb-4">
               <div className="text-sm opacity-75">Montant total débité</div>

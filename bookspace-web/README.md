@@ -1,4 +1,4 @@
-# 📖BookSpace — Frontend Web (React)
+# BookSpace — Frontend Web (React)
 
 Frontend web de la marketplace multi-vendeurs de livres papier & numériques,
 généré à partir des maquettes validées (thème « Slate & Sage »).
@@ -9,7 +9,7 @@ généré à partir des maquettes validées (thème « Slate & Sage »).
 - **React Router v6** (routing par espace : client / vendeur / admin)
 - **Tailwind CSS** — configuré avec les tokens exacts du design system des
   maquettes (`tailwind.config.js`)
-- Données mock centralisées dans `src/lib/data.js` (à remplacer par les
+- Données factices centralisées dans `src/lib/data.js` (à remplacer par les
   appels à l'API Laravel)
 
 ## Installation

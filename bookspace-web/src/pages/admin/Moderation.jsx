@@ -1,13 +1,13 @@
+import Icone from "../../components/ui/Icone";
 import React from "react";
 import { signalements } from "../../lib/donnees";
-import { FlagTriangleRight } from "lucide-react";
 
 // PAGE : Modération et signalements (/admin/moderation)
 export default function Moderation() {
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
-        <div className="section-title"><FlagTriangleRight size={22} strokeWidth={2} className="text-rose-500 fill-rose-50" /> Signalements d'abus et de contrefaçon</div>
+        <div className="section-title"><span className="inline-flex items-center gap-2"><Icone name="Flag" size={20} /> Signalements d'abus et de contrefaçon</span></div>
         <span className="pill-danger">{signalements.length} requêtes critiques</span>
       </div>
       <div className="card">
