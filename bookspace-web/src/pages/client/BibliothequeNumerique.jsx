@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { Search as SearchIcn, Cloud, Download, BookOpen, ShieldCheck, Smartphone } from "lucide-react";
 import React from "react";
 import { bibliothequeNumerique } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
@@ -53,7 +53,7 @@ export default function BibliothequeNumerique() {
                   Acheté le {b.purchased} · Format {b.format} ({b.size})
                 </div>
                 <div className="flex gap-2.5">
-                  <button className="btn-primary btn-sm">⬇ Télécharger</button>
+                  <button className="btn-primary btn-sm"><Download size={13} className="inline mr-1"/> Télécharger</button>
                   <button className="btn-outline btn-sm">Lire en ligne</button>
                 </div>
               </div>
@@ -71,11 +71,11 @@ export default function BibliothequeNumerique() {
             </div>
           </div>
           <div className="card">
-            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Smartphone" size={17} /> Compatibilité liseuses</span></div>
+            <div className="card-title"><Smartphone size={16} className="inline mr-1.5"/> Compatibilité liseuses</div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {["Vivlio", "Kobo / Tolino", "Kindle (Send-to)", "Apple Books"].map((l) => (
                 <div key={l} className="flex items-center gap-1.5">
-                  <span className="text-success"><Icone name="Check" size={14} /></span> {l}
+                  <span className="text-success">✓</span> {l}
                 </div>
               ))}
             </div>

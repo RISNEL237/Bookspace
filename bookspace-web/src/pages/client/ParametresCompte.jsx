@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { ShieldCheck } from "lucide-react";
 import React from "react";
 
 // PAGE : Paramètres et sécurité du compte (/compte/parametres)
@@ -53,7 +53,7 @@ export default function ParametresCompte() {
 
         <div className="w-full md:w-[320px] shrink-0 space-y-5">
           <div className="card">
-            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="ShieldLock" size={17} /> Double authentification</span></div>
+            <div className="card-title flex items-center gap-2"><ShieldCheck size={16}/> Double authentification</div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted">SMS / App (+33 6 42 ** 12)</span>
               <span className="pill-success">Active</span>

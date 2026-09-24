@@ -1,16 +1,16 @@
-import Icone from "../../components/ui/Icone";
 import React from "react";
 import { useParams } from "react-router-dom";
 import { commandesClient } from "../../lib/donnees";
 import { FilAriane } from "../../components/ui/Composants";
+import { Package, Truck, Home, CheckCircle2, Map, Phone } from "lucide-react";
 
 // PAGE : Suivi détaillé d'une commande (/compte/commandes/:id)
 // Affiche une frise chronologique (timeline) de livraison.
 const steps = [
-  { icon: "Check", title: "Commande confirmée", desc: "Paiement validé, transmise à la librairie", done: true },
-  { icon: "Check", title: "Colis préparé & emballé", desc: "Emballage éco-responsable renforcé", done: true },
-  { icon: "Truck", title: "En transit — Colissimo", desc: "Pris en charge par le transporteur, centre de tri Paris", current: true },
-  { icon: "MapPin", title: "Livraison à domicile", desc: "Estimée le 21 février 2025", done: false },
+  { icon: <CheckCircle2 size={13} />, title: "Commande confirmée", desc: "Paiement validé, transmise à la librairie", done: true },
+  { icon: <CheckCircle2 size={13} />, title: "Colis préparé & emballé", desc: "Emballage éco-responsable renforcé", done: true },
+  { icon: <Truck size={13} />, title: "En transit — Colissimo", desc: "Pris en charge par le transporteur, centre de tri Paris", current: true },
+  { icon: <Home size={13} />, title: "Livraison à domicile", desc: "Estimée le 21 février 2025", done: false },
 ];
 
 export default function SuiviCommande() {
@@ -31,7 +31,7 @@ export default function SuiviCommande() {
           </div>
 
           <div className="card">
-            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Package" size={17} /> Historique de livraison</span></div>
+            <div className="card-title flex items-center gap-2"><Package size={16}/> Historique de livraison</div>
             <div className="relative pl-9 mt-5">
               <div className="absolute left-[11px] top-1.5 bottom-1.5 w-0.5 bg-border" />
               {steps.map((s, i) => (
@@ -40,7 +40,7 @@ export default function SuiviCommande() {
                     className={`absolute -left-9 top-0 w-6 h-6 rounded-full flex items-center justify-center text-xs
                     ${s.current ? "bg-primary text-white" : s.done ? "bg-success text-white" : "bg-surfaceAlt text-faint border-2 border-borderStrong"}`}
                   >
-                    <Icone name={s.icon} size={14} />
+                    {s.icon}
                   </div>
                   <div className="font-bold text-sm mb-0.5">{s.title}</div>
                   <div className="text-muted text-sm">{s.desc}</div>
@@ -51,8 +51,8 @@ export default function SuiviCommande() {
         </div>
 
         <div className="w-full md:w-[340px] shrink-0">
-          <div className="h-[180px] bg-surfaceAlt rounded flex items-center justify-center text-faint text-sm border border-dashed border-borderStrong mb-4.5">
-            <span className="inline-flex items-center gap-2"><Icone name="Map" size={17} /> Carte de suivi du colis</span>
+          <div className="h-[180px] bg-surfaceAlt rounded flex flex-col items-center justify-center gap-2 text-faint text-sm border border-dashed border-borderStrong mb-4.5"><Map size={24}/><span>Carte de suivi du colis</span>
+            
           </div>
           <div className="card">
             <div className="card-title">Détails de l'envoi</div>
@@ -67,7 +67,7 @@ export default function SuiviCommande() {
                 <span className="font-bold">{v}</span>
               </div>
             ))}
-            <button className="btn-outline btn-sm w-full mt-3.5">Contacter la librairie</button>
+            <button className="btn-outline btn-sm w-full mt-3.5"><Phone size={13} className="inline mr-1.5"/> Contacter la librairie</button>
           </div>
         </div>
       </div>

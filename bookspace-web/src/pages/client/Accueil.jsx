@@ -4,19 +4,19 @@ import { livres } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { urlPaysage, urlPortrait } from "../../lib/images";
 import { Etoiles } from "../../components/ui/Composants";
-import Icone from "../../components/ui/Icone";
+import { Store, Award, Zap, Scale, GraduationCap, Landmark, Palette, Baby, Microscope, Image as ImageIcon, PartyPopper, BookOpenCheck, Building2 } from "lucide-react";
 
 // PAGE : Accueil du site (/)
 // Refonte visuelle 2026 : palette chaude orange, illustrations et
 // photos réelles, badges flottants — direction "vitrine vivante"
 // plutôt que "sobre éditorial" (retour suite aux retours reçus).
 const rayons = [
-  { icon: "Library", nom: "Romans & Fiction", total: "14 200 titres" },
-  { icon: "Palette", nom: "BD & Mangas", total: "8 900 titres" },
-  { icon: "Landmark", nom: "Histoire & Essais", total: "6 400 titres" },
-  { icon: "Microscope", nom: "Sciences & Savoirs", total: "5 100 titres" },
-  { icon: "Baby", nom: "Jeunesse & Éveil", total: "7 300 titres" },
-  { icon: "Image", nom: "Beaux Livres & Art", total: "2 600 titres" },
+  { icon: <Landmark size={22} />, nom: "Romans & Fiction", total: "14 200 titres" },
+  { icon: <Palette size={22} />, nom: "BD & Mangas", total: "8 900 titres" },
+  { icon: <Award size={22} />, nom: "Histoire & Essais", total: "6 400 titres" },
+  { icon: <Microscope size={22} />, nom: "Sciences & Savoirs", total: "5 100 titres" },
+  { icon: <Baby size={22} />, nom: "Jeunesse & Éveil", total: "7 300 titres" },
+  { icon: <ImageIcon size={22} />, nom: "Beaux Livres & Art", total: "2 600 titres" },
 ];
 
 const libraires = [
@@ -33,7 +33,7 @@ export default function Accueil() {
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <div className="flex-1">
             <div className="inline-flex items-center gap-1.5 bg-accent-pale text-accent-dark text-[11px] font-bold px-3 py-1.5 rounded-full mb-4">
-              <span className="inline-flex items-center gap-1"><Icone name="Star" size={13} /> 4.9/5 · 2100+ avis lecteurs certifiés</span>
+              ★ 4.9/5 · 2100+ avis lecteurs certifiés
             </div>
             <h1 className="font-head text-[28px] sm:text-[36px] lg:text-[44px] leading-[1.15] font-extrabold mb-4">
               Libérez Votre <span className="text-accent">Créativité</span> avec la Puissance d'un Livre.
@@ -45,10 +45,10 @@ export default function Accueil() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link to="/catalogue" className="btn-success text-center">
-                <span className="inline-flex items-center gap-2"><Icone name="BookOpen" size={17} /> Explorer le Catalogue</span>
+                <BookOpenCheck size={16} className="inline mr-1.5 -mt-0.5" /> Explorer le Catalogue
               </Link>
               <Link to="/vendeur/inscription" className="btn-outline text-center">
-                <span className="inline-flex items-center gap-2"><Icone name="Store" size={17} /> Rejoindre en tant que libraire</span>
+                <Building2 size={16} className="inline mr-1.5 -mt-0.5" /> Rejoindre en tant que libraire
               </Link>
             </div>
           </div>
@@ -60,7 +60,7 @@ export default function Accueil() {
               className="w-full rounded-2xl shadow-lg object-cover"
             />
             <div className="absolute -top-4 left-4 bg-surface rounded-xl shadow-md px-4 py-2.5 flex items-center gap-2.5">
-              <span className="text-lg"><Icone name="Store" size={20} /></span>
+              <Building2 size={18} />
               <div>
                 <div className="text-[10px] text-faint">dès</div>
                 <div className="font-head text-sm font-bold">2 Fictions Books</div>
@@ -85,7 +85,7 @@ export default function Accueil() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {rayons.map((r) => (
             <Link key={r.nom} to="/catalogue" className="card !p-4 text-center hover:shadow-pop transition-shadow">
-              <div className="mb-2 flex justify-center text-accent"><Icone name={r.icon} size={25} /></div>
+              <div className="mb-2 flex justify-center text-accent">{r.icon}</div>
               <div className="font-bold text-[12.5px] leading-tight">{r.nom}</div>
               <div className="text-faint text-[11px] mt-0.5">{r.total}</div>
             </Link>
@@ -96,7 +96,7 @@ export default function Accueil() {
       {/* BANDEAU PROMO */}
       <div className="mx-5 sm:mx-10 lg:mx-16 rounded-2xl bg-gradient-to-r from-accent-pale to-warning-bg p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div>
-          <div className="text-accent-dark font-bold text-xs mb-2"><span className="inline-flex items-center gap-1"><Icone name="Sparkles" size={14} /> OFFRE LIMITÉE</span></div>
+          <div className="text-accent-dark font-bold text-xs mb-2 flex items-center gap-1.5"><PartyPopper size={14} /> OFFRE LIMITÉE</div>
           <div className="font-head text-2xl sm:text-3xl font-extrabold mb-1">
             Livres jusqu'à <span className="text-accent">50%</span> de réduction !
           </div>
@@ -135,10 +135,10 @@ export default function Accueil() {
                 <div className="text-faint text-[11px] mb-2">{b.author}</div>
                 <div className="flex items-center justify-between">
                   <div className="text-sm">
-                    <span className="text-faint line-through text-xs mr-1">{(b.pricePaper + 3).toFixed(2)} €</span>
-                    <b className="text-accent">{b.pricePaper.toFixed(2)} €</b>
+                    <span className="text-faint text-[10px] block leading-none">dès</span>
+                    <b className="text-accent font-head">{b.priceEbook.toFixed(2)} €</b>
                   </div>
-                  <button className="btn-success btn-sm"><Icone name="ShoppingCart" size={17} /></button>
+                  <Link to={`/livre/${b.id}`} className="btn-success btn-sm flex items-center gap-1"><Store size={13} /> Offres</Link>
                 </div>
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function Accueil() {
           Pourquoi Choisir <span className="text-accent">BookSpace</span> ?
         </div>
         <div className="card !p-6 sm:!p-8 flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-16 h-16 rounded-full bg-accent text-white flex items-center justify-center text-3xl shrink-0"><Icone name="GraduationCap" size={30} /></div>
+          <div className="w-16 h-16 rounded-full bg-accent text-white flex items-center justify-center shrink-0"><GraduationCap size={28} /></div>
           <div>
             <div className="font-head text-xl font-bold mb-1">
               Élevez votre esprit, <span className="text-success">lisez responsablement</span>
@@ -169,12 +169,12 @@ export default function Accueil() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
           {[
-            ["Store", "Soutien aux Librairies Indépendantes", "100% de la marge papier reste chez votre libraire de quartier."],
-            ["Zap", "Lecture Numérique Instantanée", "Téléchargement immédiat, compatible toutes liseuses."],
-            ["Scale", "Prix Unique & Éthique (Loi Lang)", "Un prix juste, garanti identique partout."],
+            [<Store size={22} />, "Soutien aux Librairies Indépendantes", "100% de la marge papier reste chez votre libraire de quartier."],
+            [<Zap size={22} />, "Lecture Numérique Instantanée", "Téléchargement immédiat, compatible toutes liseuses."],
+            [<Scale size={22} />, "Prix Unique & Éthique (Loi Lang)", "Un prix juste, garanti identique partout."],
           ].map(([icon, titre, texte]) => (
             <div key={titre} className="card">
-              <div className="text-accent mb-2.5"><Icone name={icon} size={24} /></div>
+              <div className="mb-2.5 text-accent">{icon}</div>
               <div className="font-bold text-sm mb-1.5">{titre}</div>
               <div className="text-muted text-[12.5px]">{texte}</div>
             </div>

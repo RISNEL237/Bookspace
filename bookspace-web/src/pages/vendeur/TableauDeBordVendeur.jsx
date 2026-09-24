@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { Wallet, Truck, Star, TrendingUp } from "lucide-react";
 import React from "react";
 import { commandesVendeur } from "../../lib/donnees";
 import { CarteIndicateur } from "../../components/ui/Composants";
@@ -30,7 +30,7 @@ export default function TableauDeBordVendeur() {
         <CarteIndicateur label="Gains nets du mois" value="1 245 €" delta="↑14%" foot="Versement le 15 du mois" />
         <CarteIndicateur label="Commandes à expédier" value="4" foot="Action requise" />
         <CarteIndicateur label="Téléchargements ePub" value="142" foot="Ventes numériques ce mois" />
-        <CarteIndicateur label="Note boutique" value="4.9" foot="1 420 avis vérifiés" />
+        <CarteIndicateur label="Note boutique" value="4.9 " foot="1 420 avis vérifiés" />
       </div>
 
       <div className="flex flex-col md:flex-row gap-5 mt-5.5">
@@ -72,7 +72,7 @@ export default function TableauDeBordVendeur() {
 
       <div className="card mt-5.5">
         <div className="flex justify-between items-center mb-3.5">
-          <div className="card-title mb-0"><span className="inline-flex items-center gap-2"><Icone name="Truck" size={17} /> Commandes physiques à expédier</span></div>
+          <div className="card-title mb-0"> Commandes physiques à expédier</div>
           <span className="pill-danger">4 requises</span>
         </div>
         <table className="table-base">

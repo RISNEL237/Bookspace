@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { CreditCard } from "lucide-react";
 import React from "react";
 
 // PAGE : Paramètres de la boutique (/vendeur/parametres)
@@ -40,7 +40,7 @@ export default function ParametresBoutique() {
 
         <div className="w-full md:w-[320px] shrink-0 space-y-5">
           <div className="card">
-            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="CreditCard" size={17} /> Compte de paiement</span></div>
+            <div className="card-title"> Compte de paiement</div>
             <div className="flex justify-between text-sm mb-2">
               <span className="text-muted">Stripe Connect</span>
               <span className="pill-success">Vérifié</span>

@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { Flag } from "lucide-react";
 import React from "react";
 import { signalements } from "../../lib/donnees";
 
@@ -7,7 +7,7 @@ export default function Moderation() {
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
-        <div className="section-title"><span className="inline-flex items-center gap-2"><Icone name="Flag" size={20} /> Signalements d'abus et de contrefaçon</span></div>
+        <div className="section-title"> Signalements d'abus et de contrefaçon</div>
         <span className="pill-danger">{signalements.length} requêtes critiques</span>
       </div>
       <div className="card">

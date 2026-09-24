@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { Truck } from "lucide-react";
 import React, { useState } from "react";
 import { commandesVendeur } from "../../lib/donnees";
 
@@ -12,7 +12,7 @@ export default function CommandesVendeur() {
       <div className="section-title mb-5">Commandes à expédier</div>
       <div className="card">
         <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
-          <div className="card-title mb-0"><span className="inline-flex items-center gap-2"><Icone name="Truck" size={17} /> Commandes physiques à traiter</span></div>
+          <div className="card-title mb-0"> Commandes physiques à traiter</div>
           <div className="flex gap-2.5">
             {tabs.map((t, i) => (
               <button

@@ -223,6 +223,36 @@ export const adresses = [
 // ------------------------------------------------------------
 
 // Commandes physiques que le vendeur doit préparer/expédier
+// ------------------------------------------------------------
+// Offres multi-vendeurs (un même livre peut être vendu par
+// plusieurs librairies/éditeurs différents, chacun avec son
+// propre prix, stock, note et localisation — voir le schéma BDD :
+// table "offre" liée à "livre" ET "profil_vendeur").
+// ------------------------------------------------------------
+export const offres = [
+  { id: "off-1", idLivre: "memoires-ombre", vendeur: "Librairie Delamain", ville: "Paris 1er", lat: 48.8656, lng: 2.3376, note: 4.9, avis: 340, type: "papier", prix: 19.99, stock: true, delai: "Click & Collect 1h ou Colissimo 48h" },
+  { id: "off-2", idLivre: "memoires-ombre", vendeur: "Librairie Delamain", ville: "Paris 1er", lat: 48.8656, lng: 2.3376, note: 4.9, avis: 340, type: "numerique", prix: 9.99, stock: true, delai: "Téléchargement immédiat" },
+  { id: "off-3", idLivre: "memoires-ombre", vendeur: "Librairie de l'Odéon", ville: "Paris 6e", lat: 48.8514, lng: 2.3389, note: 4.7, avis: 210, type: "papier", prix: 19.99, stock: true, delai: "Colissimo 48h" },
+  { id: "off-4", idLivre: "memoires-ombre", vendeur: "Atelier Typographique Voltaire", ville: "Genève, Suisse", lat: 46.2044, lng: 6.1432, note: 4.6, avis: 88, type: "numerique", prix: 9.49, stock: true, delai: "Téléchargement immédiat" },
+  { id: "off-5", idLivre: "archipel-songes", vendeur: "Éditions Horizon Bleu", ville: "Distribution directe", lat: 48.87, lng: 2.35, note: 4.5, avis: 940, type: "numerique", prix: 11.99, stock: true, delai: "Téléchargement immédiat" },
+  { id: "off-6", idLivre: "archipel-songes", vendeur: "Librairie Delamain", ville: "Paris 1er", lat: 48.8656, lng: 2.3376, note: 4.9, avis: 340, type: "papier", prix: 22.0, stock: true, delai: "Click & Collect 1h" },
+];
+
+// Renvoie toutes les offres valides pour un livre. Si aucune offre
+// dédiée n'existe encore dans les données de démonstration, on
+// reconstruit une offre unique à partir des infos du livre lui-même
+// (pour que chaque fiche produit du catalogue reste fonctionnelle).
+export function offresPourLivre(idLivre) {
+  const trouvees = offres.filter((o) => o.idLivre === idLivre);
+  if (trouvees.length > 0) return trouvees;
+  const livre = livres.find((l) => l.id === idLivre);
+  if (!livre) return [];
+  return [
+    { id: `off-${idLivre}-papier`, idLivre, vendeur: livre.seller, ville: livre.sellerCity, lat: 48.8566, lng: 2.3522, note: livre.rating, avis: livre.reviews, type: "papier", prix: livre.pricePaper, stock: true, delai: "Colissimo 48h" },
+    { id: `off-${idLivre}-numerique`, idLivre, vendeur: livre.seller, ville: livre.sellerCity, lat: 48.8566, lng: 2.3522, note: livre.rating, avis: livre.reviews, type: "numerique", prix: livre.priceEbook, stock: true, delai: "Téléchargement immédiat" },
+  ];
+}
+
 export const commandesVendeur = [
   { id: "CMD-0841", client: "É. de Montalembert", title: "Les Mémoires de l'Ombre", shipping: "Colissimo", status: "En attente", tone: "warning" },
   { id: "CMD-0839", client: "Marc V.", title: "Traité d'Esthétique", shipping: "Colissimo", status: "Étiquette prête", tone: "success" },

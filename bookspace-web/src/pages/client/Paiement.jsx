@@ -1,113 +1,160 @@
-import Icone from "../../components/ui/Icone";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { articlesPanier } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
+import { CreditCard, Smartphone, Fingerprint, Lock, ArrowLeftRight } from "lucide-react";
 
 // PAGE : Paiement sécurisé (/paiement)
-// Saisie de la carte + répartition transparente entre les vendeurs.
+// Saisie du moyen de paiement (carte, Mobile Money) + répartition
+// transparente entre les vendeurs (split-payment).
+const methodes = [
+  { cle: "carte", label: "Carte Bancaire", icone: CreditCard },
+  { cle: "mtn", label: "MTN MoMo", icone: Smartphone },
+  { cle: "om", label: "Orange Money", icone: Smartphone },
+  { cle: "applegoogle", label: "Apple / Google", icone: Fingerprint },
+];
+
 export default function Paiement() {
   const navigate = useNavigate();
-  const [methode, definirMethode] = useState("card");
+  const [methode, definirMethode] = useState("carte");
   const total = articlesPanier.reduce((s, i) => s + i.price * i.qty, 0) + articlesPanier.reduce((s, i) => s + i.shipping, 0);
 
   return (
     <div>
-      <div className="px-4 sm:px-6 lg:px-10 pt-5 flex flex-wrap gap-x-2.5 gap-y-2 text-[11px] sm:text-[12.5px] text-faint font-bold items-center">
-        <div className="flex items-center gap-2 text-ink">
-          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px] shrink-0"><Icone name="Check" size={12} /></span>
-          Panier
+      {/* En-tête sombre avec étapes */}
+      <div className="bg-primary text-white px-4 sm:px-6 lg:px-10 py-4 flex flex-wrap items-center gap-3">
+        <span className="font-head font-bold">Book<span className="text-accent">Space</span></span>
+        <div className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] sm:text-xs text-white/60 ml-2">
+          <span>1. Panier</span> <span>›</span> <span>2. Livraison & Coordonnées</span> <span>›</span>
+          <span className="text-accent font-bold">3. Paiement Sécurisé</span>
         </div>
-        <span className="hidden sm:inline">———</span>
-        <div className="flex items-center gap-2 text-ink">
-          <span className="w-[22px] h-[22px] rounded-full bg-success text-white flex items-center justify-center text-[11px] shrink-0"><Icone name="Check" size={12} /></span>
-          <span className="sm:hidden">Livraison</span>
-          <span className="hidden sm:inline">Livraison & coordonnées</span>
-        </div>
-        <span className="hidden sm:inline">———</span>
-        <div className="flex items-center gap-2 text-primary">
-          <span className="w-[22px] h-[22px] rounded-full bg-primary text-white flex items-center justify-center text-[11px] shrink-0">3</span>
-          Paiement sécurisé
-        </div>
+        <span className="ml-auto pill" style={{ background: "rgba(255,255,255,.14)", color: "#fff" }}>
+          Paiement Séquestre 256-bit
+        </span>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-7 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
+      <div className="flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
         <div className="flex-[1.5]">
-          <div className="section-title text-xl">Options de paiement</div>
-          <div className="text-muted text-sm mb-5 mt-1">
-            Réglez en une seule fois — la répartition entre les vendeurs est
-            automatique.
-          </div>
-          <div className="flex gap-3 mb-5">
-            {[["card", "CreditCard", "Carte bancaire"], ["mobile", "Smartphone", "Paiement mobile"], ["paypal", "Wallet", "PayPal"]].map(([k, icon, l]) => (
-              <button
-                key={k}
-                onClick={() => definirMethode(k)}
-                className={`flex-1 border-[1.5px] rounded p-3.5 text-center text-[12.5px] font-bold ${methode === k ? "border-primary bg-primary-pale text-primary" : "border-borderStrong text-muted"}`}
-              >
-                <span className="inline-flex items-center justify-center gap-2"><Icone name={icon} size={16} /> {l}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="card">
-            <div className="field">
-              <label>Numéro de carte</label>
-              <input className="input" defaultValue="4532 9012 3456 8923" />
+          <div className="card mb-5">
+            <div className="flex justify-between items-center mb-1">
+              <div className="card-title mb-0">Option de règlement</div>
+              <span className="pill-muted">MULTI-DEVISES UE</span>
             </div>
-            <div className="flex gap-4">
-              <div className="field flex-1">
-                <label>Expiration (MM/AA)</label>
-                <input className="input" defaultValue="11 / 27" />
-              </div>
-              <div className="field flex-1">
-                <label>Code CVC</label>
-                <input className="input" defaultValue="•••" />
-              </div>
-            </div>
-            <div className="field">
-              <label>Titulaire de la carte</label>
-              <input className="input" defaultValue="Éléonore de Montalembert" />
-            </div>
-            <button onClick={() => navigate("/commande/confirmation")} className="btn-primary w-full py-4 mt-1.5">
-              <span className="inline-flex items-center justify-center gap-2"><Icone name="Lock" size={16} /> Confirmer le paiement de {total.toFixed(2)} €</span>
-            </button>
-            <div className="flex gap-2.5 mt-4 justify-center">
-              {["PCI-DSS Niveau 1", "Chiffrement AES-256", "3-D Secure"].map((p) => (
-                <span key={p} className="pill-muted">{p}</span>
+            <div className="text-muted text-xs mb-4">Sélectionnez votre moyen de transaction protégé</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+              {methodes.map((m) => (
+                <button
+                  key={m.cle}
+                  onClick={() => definirMethode(m.cle)}
+                  className={`border-[1.5px] rounded-lg p-3 text-center text-[12px] font-bold ${methode === m.cle ? "border-accent bg-accent-pale text-accent-dark" : "border-borderStrong text-muted"}`}
+                >
+                  <m.icone size={20} className="mx-auto mb-1" />
+                  {m.label}
+                </button>
               ))}
             </div>
+
+            {methode === "carte" ? (
+              <>
+                <div className="field">
+                  <label>Nom du titulaire de la carte</label>
+                  <input className="input" defaultValue="Éléonore de Montalembert" />
+                </div>
+                <div className="field">
+                  <label>Numéro de carte bancaire</label>
+                  <input className="input" defaultValue="4532 •••• •••• 8824" />
+                </div>
+                <div className="flex gap-4">
+                  <div className="field flex-1">
+                    <label>Date d'expiration (MM/AA)</label>
+                    <input className="input" defaultValue="09 / 28" />
+                  </div>
+                  <div className="field flex-1">
+                    <label>Code de sécurité</label>
+                    <input className="input" defaultValue="•••" />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="field">
+                <label>Numéro de téléphone {methode === "mtn" ? "MTN MoMo" : methode === "om" ? "Orange Money" : ""}</label>
+                <input className="input" placeholder="+237 6 XX XX XX XX" />
+                <div className="text-faint text-[11.5px] mt-2">
+                  Vous recevrez une notification de confirmation sur votre téléphone pour valider le paiement.
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="card mb-5">
+            <div className="flex justify-between items-center">
+              <div className="card-title mb-0 text-sm">Compte & Coordonnées de Facturation</div>
+              <button className="text-accent-dark text-xs font-bold">Modifier</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 text-xs text-muted">
+              <div>
+                <div className="font-bold text-ink">Éléonore de Montalembert</div>
+                <div>e.montalembert@institut-lettres.fr</div>
+              </div>
+              <div>
+                <div className="font-bold text-ink">Adresse de facturation</div>
+                <div>14 Rue de l'Odéon, 75006 Paris</div>
+              </div>
+            </div>
+          </div>
+
+          <button onClick={() => navigate("/commande/confirmation")} className="btn-accent w-full py-4">
+            <Lock size={15} className="inline mr-1.5 -mt-0.5" /> Confirmer et Payer {total.toFixed(2)} €
+          </button>
+          <div className="flex flex-wrap gap-2.5 mt-4 justify-center">
+            {["PCI-DSS Niveau 1", "Chiffrement AES-256", "3-D Secure 2.0", "Garantie 14 Jours"].map((p) => (
+              <span key={p} className="pill-muted">{p}</span>
+            ))}
           </div>
         </div>
 
         <div className="flex-1">
           <div className="card">
-            <div className="card-title"><span className="inline-flex items-center gap-2"><Icone name="Shuffle" size={17} /> Transparence de la transaction</span></div>
-            <div className="card-sub">Paiement unique, réparti automatiquement entre 2 vendeurs</div>
-            <div className="bg-primary rounded p-4.5 text-white mb-4">
-              <div className="text-sm opacity-75">Montant total débité</div>
+            <div className="flex justify-between items-center">
+              <div className="card-title mb-0 flex items-center gap-2"><ArrowLeftRight size={16}/> Transparence de la Transaction</div>
+              <span className="pill-success">Stripe Connect</span>
+            </div>
+            <div className="card-sub">Réparti automatiquement vers chaque bénéficiaire certifié</div>
+            <div className="bg-primary rounded-lg p-4.5 text-white mb-4">
+              <div className="flex justify-between items-center">
+                <div className="text-sm opacity-75">Montant total débité</div>
+                <span className="pill" style={{ background: "rgba(255,255,255,.14)", color: "#fff" }}>1 seul prélèvement</span>
+              </div>
               <div className="font-head text-[26px] font-bold">{total.toFixed(2)} €</div>
             </div>
+
+            <div className="h-2 rounded-full overflow-hidden flex mb-4">
+              <div className="bg-info" style={{ width: "63%" }} />
+              <div className="bg-accent" style={{ width: "29%" }} />
+              <div className="bg-warning" style={{ width: "8%" }} />
+            </div>
+
             {[
-              ["accent", "Part plateforme BookSpace", "Frais de service & hébergement", "4,50 €"],
-              ["info", "Librairie Delamain", "Livre papier + frais de port", "18,99 €"],
-              ["warning", "Éditions Horizon Bleu", "E-pub — rémunération directe", "9,99 €"],
-            ].map(([color, name, desc, amt]) => (
-              <div key={name} className="flex items-center gap-3.5 py-3.5 border-b border-border last:border-b-0">
-                <div className={`w-2.5 h-2.5 rounded-full bg-${color} shrink-0`} />
+              ["bg-info", "Librairie Partenaire Delamain", "Livre papier + frais de port, 100% marge respectée", (total * 0.63).toFixed(2)],
+              ["bg-accent", "Éditions Horizon Bleu · Auteur", "ePub numérique sécurisé DRM social, droits d'auteur", (total * 0.29).toFixed(2)],
+              ["bg-warning", "Plateforme BookSpace", "Frais d'infrastructure, hébergement & escrow", (total * 0.08).toFixed(2)],
+            ].map(([couleur, nom, desc, montant]) => (
+              <div key={nom} className="flex items-center gap-3 py-3 border-b border-border last:border-b-0">
+                <div className={`w-2.5 h-2.5 rounded-full ${couleur} shrink-0`} />
                 <div className="flex-1">
-                  <div className="font-bold text-sm">{name}</div>
-                  <div className="text-faint text-xs">{desc}</div>
+                  <div className="font-bold text-[13px]">{nom}</div>
+                  <div className="text-faint text-[11px]">{desc}</div>
                 </div>
-                <div className="font-bold">{amt}</div>
+                <div className="font-bold text-sm">{montant} €</div>
               </div>
             ))}
           </div>
+
           <div className="card mt-4.5">
-            <div className="card-title text-sm">Articles de la commande ({articlesPanier.length})</div>
+            <div className="card-title text-sm">Récapitulatif des Articles ({articlesPanier.length})</div>
             {articlesPanier.map((it) => (
               <div key={it.id} className="flex gap-3 items-center py-2.5 border-b border-border last:border-b-0">
-                <CouvertureLivre cover={it.cover} className="w-[34px] h-[46px] shrink-0" />
+                <CouvertureLivre graine={it.id} className="w-[34px] h-[46px] shrink-0" />
                 <div className="flex-1">
                   <div className="text-sm font-bold">{it.title}</div>
                   <div className="text-faint text-xs">{it.format.split(" —")[0]} · {it.author}</div>
@@ -115,6 +162,10 @@ export default function Paiement() {
                 <div className="text-sm font-bold">{it.price.toFixed(2)} €</div>
               </div>
             ))}
+            <div className="flex justify-between pt-3 mt-1 border-t border-border font-bold">
+              <span>Total TTC à régler</span>
+              <span className="text-accent text-lg">{total.toFixed(2)} €</span>
+            </div>
           </div>
         </div>
       </div>

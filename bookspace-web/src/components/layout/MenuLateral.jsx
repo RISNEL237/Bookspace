@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import Icone from "../ui/Icone";
+import { Menu, X } from "lucide-react";
 
 // Menu latéral générique (réutilisé pour le compte client,
 // l'espace vendeur et la console administrateur) : reçoit la liste des liens en paramètre.
@@ -26,7 +26,7 @@ export default function MenuLateral({ brand, tag, links, footer }) {
           className={({ isActive }) => `side-link ${isActive ? "active" : ""}`}
         >
           <span className="w-5 h-5 rounded-[5px] bg-surfaceAlt flex items-center justify-center text-[11px] shrink-0">
-            <Icone name={l.icon} size={15} />
+            {l.icon}
           </span>
           <span className="flex-1">{l.label}</span>
           {l.badge && <span className="pill-danger">{l.badge}</span>}
@@ -44,7 +44,7 @@ export default function MenuLateral({ brand, tag, links, footer }) {
           onClick={() => setOuvert(true)}
           className="flex items-center gap-2 text-sm font-bold text-primary"
         >
-          <Icone name="Menu" size={19} /> Menu
+          <Menu size={18} /> Menu
         </button>
       </div>
 
@@ -59,10 +59,10 @@ export default function MenuLateral({ brand, tag, links, footer }) {
           <div className="w-[82%] max-w-[300px] h-full bg-surface p-6 flex flex-col gap-1 overflow-y-auto shadow-pop">
             <button
               onClick={() => setOuvert(false)}
-              className="self-end text-2xl leading-none text-muted mb-3"
+              className="self-end text-muted mb-3"
               aria-label="Fermer le menu"
             >
-              <Icone name="X" size={22} />
+              <X size={22} />
             </button>
             {contenu}
           </div>

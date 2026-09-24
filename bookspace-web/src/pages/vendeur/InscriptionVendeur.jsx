@@ -1,11 +1,11 @@
-import Icone from "../../components/ui/Icone";
+import { CheckCircle2, FileText } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
 // PAGE : Inscription vendeur / vérification KYB (/vendeur/inscription)
 // Étape de dépôt des justificatifs avant activation du compte.
 const steps = [
-  { n: "Check", label: "Type de structure", done: true },
+  { n: "", label: "Type de structure", done: true },
   { n: "2", label: "Vérification (KYB)", on: true },
   { n: "3", label: "Compte de paiement" },
   { n: "4", label: "Catalogue initial" },
@@ -72,14 +72,14 @@ export default function InscriptionVendeur() {
             <div className="card-title text-sm">Documents justificatifs</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"><Icone name="Check" size={18} /></div>
+                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"></div>
                 <div>
                   <div className="text-sm font-bold">Kbis (extrait)</div>
                   <div className="text-faint text-xs">Vérifié automatiquement</div>
                 </div>
               </div>
               <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"><Icone name="Check" size={18} /></div>
+                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"></div>
                 <div>
                   <div className="text-sm font-bold">RIB / IBAN</div>
                   <div className="text-faint text-xs">Format conforme</div>
@@ -87,7 +87,7 @@ export default function InscriptionVendeur() {
               </div>
             </div>
             <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center"><Icone name="FileText" size={18} /></div>
+              <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center"></div>
               <div>
                 <div className="text-sm font-bold">Pièce d'identité du gérant</div>
                 <div className="text-faint text-xs">Glissez un fichier PDF ou JPG — 10 Mo max</div>

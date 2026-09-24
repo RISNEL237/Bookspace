@@ -15,6 +15,8 @@ import Panier from "./pages/client/Panier";
 import Paiement from "./pages/client/Paiement";
 import ConfirmationCommande from "./pages/client/ConfirmationCommande";
 import VitrineVendeur from "./pages/client/VitrineVendeur";
+import CarteLibrairies from "./pages/client/CarteLibrairies";
+import CarnetsCritiques from "./pages/client/CarnetsCritiques";
 import TableauDeBordCompte from "./pages/client/TableauDeBordCompte";
 import ListeCommandesClient from "./pages/client/ListeCommandesClient";
 import SuiviCommande from "./pages/client/SuiviCommande";
@@ -56,6 +58,8 @@ export default function Application() {
         <Route path="/paiement" element={<Paiement />} />
         <Route path="/commande/confirmation" element={<ConfirmationCommande />} />
         <Route path="/librairie/:id" element={<VitrineVendeur />} />
+        <Route path="/librairies" element={<CarteLibrairies />} />
+        <Route path="/carnets-critiques" element={<CarnetsCritiques />} />
       </Route>
 
       <Route path="/login" element={<Connexion />} />

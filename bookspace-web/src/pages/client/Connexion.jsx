@@ -1,100 +1,118 @@
-import Icone from "../../components/ui/Icone";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { BookOpen, Store, PenLine, Mail, Lock, Eye, EyeOff, ShieldCheck, Library, Building2 } from "lucide-react";
 
 // PAGE : Connexion / Inscription (/login)
-// Bascule entre l'espace client et l'espace vendeur.
+// 3 espaces au choix : Lecteur, Libraire indépendant, Maison d'édition.
+const espaces = [
+  { cle: "lecteur", icone: BookOpen, titre: "Lecteur & Passionné", sous: "Bibliothèque, liseuses & commandes" },
+  { cle: "libraire", icone: Store, titre: "Libraire Indépendant", sous: "Stocks, Click & Collect, Colissimo" },
+  { cle: "editeur", icone: PenLine, titre: "Maison d'Édition & Auteur", sous: "Manuscrits, ePub & royautés" },
+];
+
 export default function Connexion() {
-  const [mode, setMode] = useState("client");
+  const [espace, setEspace] = useState("lecteur");
+  const [onglet, setOnglet] = useState("connexion");
+  const [voirMdp, setVoirMdp] = useState(false);
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden md:flex w-[44%] bg-primary text-white p-14 flex-col justify-between relative overflow-hidden">
-        <Link to="/" className="font-head text-xl font-bold flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-white inline-block" />
-          BookSpace
+    <div className="min-h-screen bg-bg py-6 sm:py-10 px-4 sm:px-6">
+      <div className="max-w-[1000px] mx-auto">
+        <Link to="/" className="font-head text-xl font-bold flex items-center gap-1 mb-6">
+          <span className="text-ink">Book</span><span className="text-accent">Space</span>
         </Link>
-        <div className="font-head text-[19px] leading-relaxed relative z-10">
-          « Le livre papier et numérique réunis sur une seule place de
-          marché — au service des librairies indépendantes. »
-          <div className="text-sm font-body opacity-60 mt-5">
-            +120 librairies partenaires · 50 000+ titres
-          </div>
+
+        {/* Sélection de l'espace */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          {espaces.map((e) => {
+            const Icone = e.icone;
+            return (
+              <button
+                key={e.cle}
+                onClick={() => setEspace(e.cle)}
+                className={`text-left border-[1.5px] rounded-lg p-4 flex items-center gap-3 ${espace === e.cle ? "border-accent bg-accent-pale" : "border-border bg-surface"}`}
+              >
+                <Icone size={20} className={espace === e.cle ? "text-accent-dark" : "text-muted"} />
+                <div>
+                  <div className="font-bold text-sm">{e.titre}</div>
+                  <div className="text-faint text-[11px]">{e.sous}</div>
+                </div>
+              </button>
+            );
+          })}
         </div>
-        <div className="text-sm opacity-55">
-          © 2026 BookSpace — Plateforme éthique du livre
-        </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="w-full max-w-[440px]">
-          <div className="section-title mb-1.5">Bon retour parmi nous</div>
-          <div className="text-muted text-sm mb-6">
-            Connectez-vous pour accéder à votre espace
-          </div>
+        <div className="flex flex-col lg:flex-row gap-5">
+          <div className="flex-1 card">
+            <div className="flex gap-6 border-b border-border mb-6 text-sm font-bold">
+              <button onClick={() => setOnglet("connexion")} className={`pb-3 ${onglet === "connexion" ? "text-ink border-b-2 border-accent" : "text-faint"}`}>Se connecter</button>
+              <button onClick={() => setOnglet("inscription")} className={`pb-3 ${onglet === "inscription" ? "text-ink border-b-2 border-accent" : "text-faint"}`}>Créer un compte</button>
+            </div>
 
-          <div className="flex bg-surfaceAlt rounded-[10px] p-1 mb-7">
-            <button
-              onClick={() => setMode("client")}
-              className={`flex-1 text-center py-2.5 rounded-[8px] text-[13px] font-bold ${mode === "client" ? "bg-surface text-primary shadow-card" : "text-muted"}`}
-            >
-              Espace client
-            </button>
-            <button
-              onClick={() => setMode("vendeur")}
-              className={`flex-1 text-center py-2.5 rounded-[8px] text-[13px] font-bold ${mode === "vendeur" ? "bg-surface text-primary shadow-card" : "text-muted"}`}
-            >
-              Espace vendeur
-            </button>
-          </div>
+            <div className="font-head text-2xl font-extrabold mb-1.5">
+              {onglet === "connexion" ? "Heureux de vous revoir" : "Rejoignez BookSpace"}
+            </div>
+            <div className="text-muted text-sm mb-6">
+              {onglet === "connexion" ? "Retrouvez vos lectures, favoris et commandes." : "Créez votre compte en moins d'une minute."}
+            </div>
 
-          <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-2.5">
-            <span className="inline-flex items-center gap-2"><Icone name="CirclePlay" size={16} /> Continuer avec Google</span>
-          </button>
-          <button className="w-full flex items-center justify-center gap-2.5 border border-borderStrong rounded-[8px] py-2.5 text-[13px] font-bold text-muted mb-5">
-            <span className="inline-flex items-center gap-2"><Icone name="User" size={16} /> Continuer avec Apple</span>
-          </button>
-          <div className="flex items-center gap-3 text-[11.5px] text-faint mb-5">
-            <div className="flex-1 h-px bg-border" /> OU PAR E-MAIL
-            <div className="flex-1 h-px bg-border" />
-          </div>
+            {onglet === "inscription" && (
+              <div className="field">
+                <label>Nom complet</label>
+                <input className="input" placeholder="Votre nom et prénom" />
+              </div>
+            )}
+            <div className="field">
+              <label>Adresse e-mail</label>
+              <div className="input flex items-center gap-2">
+                <Mail size={15} className="text-faint shrink-0" />
+                <input type="email" placeholder="vous@exemple.fr" className="flex-1 outline-none bg-transparent" />
+              </div>
+            </div>
+            <div className="field">
+              <label>Mot de passe</label>
+              <div className="input flex items-center gap-2">
+                <Lock size={15} className="text-faint shrink-0" />
+                <input type={voirMdp ? "text" : "password"} placeholder="••••••••••" className="flex-1 outline-none bg-transparent" />
+                <button type="button" onClick={() => setVoirMdp((v) => !v)} className="text-faint shrink-0">
+                  {voirMdp ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
 
-          <div className="field mb-4">
-            <label>Adresse e-mail</label>
-            <input className="input" placeholder="vous@exemple.com" />
-          </div>
-          <div className="field mb-2">
-            <label>Mot de passe</label>
-            <input className="input" type="password" placeholder="••••••••••" />
-          </div>
-          <div className="flex justify-between items-center mb-5 mt-3">
-            <label className="flex items-center gap-2 text-sm text-muted">
-              <input type="checkbox" defaultChecked /> Se souvenir de moi
-            </label>
-            <span className="text-sm font-bold text-accent-dark cursor-pointer">
-              Mot de passe oublié ?
-            </span>
-          </div>
+            {onglet === "connexion" && (
+              <div className="flex justify-between items-center mb-5 mt-1 text-xs">
+                <label className="flex items-center gap-2 text-muted"><input type="checkbox" defaultChecked /> Se souvenir de moi</label>
+                <span className="text-accent-dark font-bold cursor-pointer">Mot de passe oublié ?</span>
+              </div>
+            )}
 
-          <Link
-            to={mode === "client" ? "/compte" : "/vendeur"}
-            className="btn-primary w-full py-3.5"
-          >
-            Se connecter
-          </Link>
-
-          <div className="text-center text-sm text-muted mt-5">
-            Pas encore de compte ?{" "}
-            <span className="font-bold text-primary cursor-pointer">
-              Créer un compte gratuitement
-            </span>
-          </div>
-          <div className="h-px bg-border my-5" />
-          <div className="text-center text-sm text-muted">
-            Vous êtes libraire ou éditeur ?{" "}
-            <Link to="/vendeur/inscription" className="font-bold text-accent-dark">
-              Rejoindre le réseau vendeurs →
+            <Link to={espace === "lecteur" ? "/compte" : espace === "libraire" ? "/vendeur" : "/vendeur/inscription"} className="btn-accent w-full py-3.5">
+              {onglet === "connexion" ? "Accéder à mon espace BookSpace" : "Créer mon compte"} →
             </Link>
+
+            {espace === "libraire" && onglet === "inscription" && (
+              <div className="text-faint text-[11px] text-center mt-3">
+                Votre demande sera soumise à vérification (KYB) avant activation.
+              </div>
+            )}
+          </div>
+
+          <div className="w-full lg:w-[320px] shrink-0 bg-primary rounded-lg p-6 sm:p-7 text-white flex flex-col justify-between">
+            <img src="/logo-icon.png" alt="BookSpace" className="h-14 w-auto mb-5" />
+            <div>
+              <div className="text-3xl leading-none mb-3 opacity-60">"</div>
+              <div className="font-head text-base leading-relaxed mb-4">
+                Un livre est une fenêtre par laquelle on s'évade. Retrouvez
+                vos lectures physiques et numériques au même endroit.
+              </div>
+              <div className="text-white/60 text-xs">— Manifeste BookSpace</div>
+            </div>
+            <div className="mt-6 pt-5 border-t border-white/15 text-xs text-white/70 space-y-2">
+              <div className="flex items-center gap-2"><ShieldCheck size={14} className="shrink-0" /> Chiffrement TLS 1.3 & stockage souverain</div>
+              <div className="flex items-center gap-2"><Library size={14} className="shrink-0" /> Pérennité ePub garantie, DRM social transparent</div>
+              <div className="flex items-center gap-2"><Building2 size={14} className="shrink-0" /> Circuit court : 450+ libraires partenaires</div>
+            </div>
           </div>
         </div>
       </div>

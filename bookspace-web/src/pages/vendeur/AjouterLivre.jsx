@@ -1,4 +1,4 @@
-import Icone from "../../components/ui/Icone";
+import { UploadCloud } from "lucide-react";
 import React, { useState } from "react";
 
 // PAGE : Ajouter un ouvrage (/vendeur/livres/nouveau)
@@ -90,7 +90,7 @@ export default function AjouterLivre() {
             </div>
           </div>
           <div className="border-2 border-dashed border-borderStrong rounded bg-surfaceAlt p-5 text-center">
-            <div className="text-2xl mb-1.5"><Icone name="CloudUpload" size={28} /></div>
+            <div className="text-2xl mb-1.5"></div>
             <div className="text-sm font-bold">Téléverser le fichier source (.epub, .pdf)</div>
             <div className="text-faint text-xs mt-1">Glissez votre fichier ici — 50 Mo max</div>
           </div>

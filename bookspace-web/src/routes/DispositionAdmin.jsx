@@ -2,15 +2,16 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { BarreNavigationPortail } from "../components/layout/BarreNavigationPortail";
 import MenuLateral from "../components/layout/MenuLateral";
+import { LayoutGrid, ShieldCheck, Flag, Percent, FileClock } from "lucide-react";
 
 // Disposition de la console administrateur : barre de navigation
 // + menu latéral admin + contenu de la page.
 const links = [
-  { to: "/admin", end: true, icon: "LayoutGrid", label: "Vue d'ensemble" },
-  { to: "/admin/verification", icon: "ShieldCheck", label: "Vérification vendeurs", badge: "12" },
-  { to: "/admin/moderation", icon: "Flag", label: "Modération & signalements", badge: "4" },
-  { to: "/admin/commissions", icon: "%", label: "Commissions & règles" },
-  { to: "/admin/logs", icon: "ScrollText", label: "Journaux de sécurité" },
+  { to: "/admin", end: true, icon: <LayoutGrid size={13} />, label: "Vue d'ensemble" },
+  { to: "/admin/verification", icon: <ShieldCheck size={13} />, label: "Vérification vendeurs", badge: "12" },
+  { to: "/admin/moderation", icon: <Flag size={13} />, label: "Modération & signalements", badge: "4" },
+  { to: "/admin/commissions", icon: <Percent size={13} />, label: "Commissions & règles" },
+  { to: "/admin/logs", icon: <FileClock size={13} />, label: "Journaux de sécurité" },
 ];
 
 export default function DispositionAdmin() {

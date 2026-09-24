@@ -1,127 +1,158 @@
-import Icone from "../../components/ui/Icone";
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { livres } from "../../lib/donnees";
+import { livres, offresPourLivre } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { Etoiles, FilAriane } from "../../components/ui/Composants";
+import {
+  Heart, BookOpen, Headphones, Store, MapPin, Star, Truck,
+  ShieldCheck, ChevronRight, Smartphone, Check,
+} from "lucide-react";
 
 // PAGE : Fiche produit (/livre/:id)
-// Détail d'un livre : choix du format, ajout au panier, avis.
+// Présente le LIVRE (fiche bibliographique unique) puis TOUTES les
+// OFFRES des vendeurs qui le proposent (prix, format, localisation,
+// avis) — un même livre peut être vendu par plusieurs librairies.
+// Le client compare et choisit son vendeur avant d'ajouter au panier.
+const onglets = ["Résumé & Synopsis", "Spécifications", "Avis Lecteurs"];
+
 export default function FicheProduit() {
   const { id } = useParams();
   const book = livres.find((b) => b.id === id) || livres[0];
-  const [format, setFormat] = useState("paper");
-  const [quantite, definirQuantite] = useState(1);
+  const offres = offresPourLivre(book.id);
+  const [filtreFormat, setFiltreFormat] = useState("tous");
+  const [onglet, definirOnglet] = useState(0);
+
+  const offresFiltrees = offres.filter((o) => filtreFormat === "tous" || o.type === filtreFormat);
+  const meilleurPrix = Math.min(...offres.map((o) => o.prix));
 
   return (
     <div>
-      <FilAriane
-        items={[
-          { label: "Accueil", to: "/" },
-          { label: book.genre, to: "/catalogue" },
-          { label: book.title },
-        ]}
-      />
-      <div className="flex flex-col md:flex-row gap-9 px-4 sm:px-6 lg:px-10 pt-7">
-        <div className="w-full md:w-[340px] shrink-0">
-          <CouvertureLivre cover={book.cover} title={book.title.toUpperCase()} author={book.author} className="h-[420px] rounded" />
-          <div className="flex gap-2.5 mt-3.5">
-            {[0, 1, 2].map((i) => (
-              <CouvertureLivre key={i} cover={book.cover} className={`w-14 h-14 ${i === 0 ? "ring-2 ring-primary" : "ring-2 ring-border"}`} />
-            ))}
+      <FilAriane items={[{ label: "Accueil", to: "/" }, { label: book.genre, to: "/catalogue" }, { label: book.title }]} />
+
+      <div className="flex flex-col lg:flex-row gap-8 px-4 sm:px-6 lg:px-10 pt-6">
+        {/* Colonne image + infos livre */}
+        <div className="w-full lg:w-[300px] shrink-0">
+          <div className="relative">
+            <button className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+              <Heart size={16} />
+            </button>
+            <CouvertureLivre graine={book.id} className="w-full" ratio="3/4" />
+          </div>
+          <div className="flex gap-2.5 mt-3">
+            <button className="btn-outline btn-sm flex-1 flex items-center justify-center gap-1.5"><BookOpen size={13} /> Extrait</button>
+            <button className="btn-outline btn-sm flex-1 flex items-center justify-center gap-1.5"><Headphones size={13} /> Audio</button>
           </div>
         </div>
 
-        <div className="flex-1">
-          <span className="pill-info mb-3 inline-block">Notice critique certifiée</span>
-          <h1 className="font-head text-3xl font-bold mb-1.5">{book.title}</h1>
-          <div className="text-muted text-sm mb-4">
-            Par <b className="text-primary">{book.author}</b> · <Etoiles rating={book.rating} /> ({book.reviews} avis) · Parution {book.published} · {book.pages} pages
+        {/* Colonne fiche livre + liste d'offres */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className="pill-muted">{book.genre?.toUpperCase()}</span>
+          </div>
+          <h1 className="font-head text-2xl sm:text-3xl font-extrabold mb-1.5">{book.title}</h1>
+          <div className="text-muted text-sm mb-3">
+            Auteur : <span className="text-accent-dark font-bold">{book.author}</span> · Parution {book.published}
+          </div>
+          <div className="flex items-center gap-2 mb-6">
+            <Etoiles rating={book.rating} /> <span className="text-faint text-xs">{book.reviews} avis vérifiés, tous vendeurs confondus</span>
           </div>
 
-          <div className="flex gap-3 my-5">
-            <button
-              onClick={() => setFormat("paper")}
-              className={`flex-1 text-left border-[1.5px] rounded p-4 ${format === "paper" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
-            >
-              <div className="text-xs text-muted font-bold uppercase mb-1.5"><span className="inline-flex items-center gap-1.5"><Icone name="BookOpen" size={15} /> Livre broché</span></div>
-              <div className="font-head text-[22px] font-bold text-primary">{book.pricePaper.toFixed(2)} €</div>
-              <div className="text-muted text-xs mt-1.5">Prix unique garanti — Loi Lang</div>
-            </button>
-            <button
-              onClick={() => setFormat("ebook")}
-              className={`flex-1 text-left border-[1.5px] rounded p-4 ${format === "ebook" ? "border-primary bg-primary-pale" : "border-borderStrong"}`}
-            >
-              <div className="text-xs text-muted font-bold uppercase mb-1.5"><span className="inline-flex items-center gap-1.5"><Icone name="Download" size={15} /> E-pub / PDF</span></div>
-              <div className="font-head text-[22px] font-bold text-primary">{book.priceEbook.toFixed(2)} €</div>
-              <div className="text-muted text-xs mt-1.5">Téléchargement immédiat</div>
-            </button>
-          </div>
-
-          <div className="bg-surfaceAlt rounded p-4 flex items-center gap-3.5 my-4.5">
-            <div className="w-[38px] h-[38px] rounded-[10px] bg-primary text-white flex items-center justify-center shrink-0"><Icone name="Store" size={19} /></div>
-            <div className="flex-1">
-              <div className="font-bold text-sm">Vendu et expédié par {book.seller}</div>
-              <div className="text-faint text-xs"><span className="inline-flex items-center gap-1">{book.sellerCity} · <Icone name="Star" size={12} /> {book.rating} ({book.reviews} ventes)</span></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="font-bold text-base flex items-center gap-2">
+              <Store size={17} /> {offres.length} offre{offres.length > 1 ? "s" : ""} disponible{offres.length > 1 ? "s" : ""}
             </div>
-            <span className="pill-success">En stock</span>
-          </div>
-
-          <div className="flex items-center gap-4 my-5">
-            <div className="flex items-center border border-borderStrong rounded-[8px] overflow-hidden text-sm">
-              <button onClick={() => definirQuantite(Math.max(1, quantite - 1))} className="w-[34px] h-[34px] font-bold text-muted">–</button>
-              <span className="w-9 text-center font-bold">{quantite}</span>
-              <button onClick={() => definirQuantite(quantite + 1)} className="w-[34px] h-[34px] font-bold text-muted">+</button>
-            </div>
-            <button className="btn-primary flex-1">
-              <span className="inline-flex items-center justify-center gap-2"><Icone name="ShoppingBag" size={16} /> Ajouter au panier — {(format === "paper" ? book.pricePaper : book.priceEbook).toFixed(2)} €</span>
-            </button>
-            <button className="btn-outline"><Icone name="Heart" size={18} /></button>
-          </div>
-          <div className="text-sm text-muted">
-            <span className="inline-flex items-center gap-1.5"><Icone name="Truck" size={15} /> Livraison à domicile sous 48h ou retrait gratuit en librairie · <Icone name="Lock" size={15} /> Paiement sécurisé</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-7 border-b border-border mx-10 mt-9 text-sm">
-        {["Résumé de l'œuvre", "Spécifications", `Avis (${book.reviews})`, "L'autrice"].map((t, i) => (
-          <div key={t} className={`py-3 font-bold ${i === 0 ? "text-primary border-b-2 border-accent" : "text-faint"}`}>
-            {t}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-8 px-4 sm:px-6 lg:px-10 py-7">
-        <div className="flex-[1.4]">
-          <p className="text-muted text-[13.5px] leading-relaxed">{book.synopsis}</p>
-          <div className="mt-6">
-            <div className="section-title text-base mb-3">Livres du même auteur</div>
-            <div className="flex gap-4 flex-wrap">
-              {livres.filter((b) => b.author === book.author && b.id !== book.id).map((b) => (
-                <Link key={b.id} to={`/livre/${b.id}`} className="text-sm font-bold text-accent-dark">
-                  {b.title} →
-                </Link>
+            <div className="flex gap-2">
+              {["tous", "papier", "numerique"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFiltreFormat(f)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold ${filtreFormat === f ? "bg-primary text-white" : "bg-surfaceAlt text-muted"}`}
+                >
+                  {f === "tous" ? "Tous formats" : f === "papier" ? "Papier" : "Numérique"}
+                </button>
               ))}
             </div>
           </div>
-        </div>
-        <div className="w-full md:w-[320px] shrink-0">
-          <div className="card">
-            <div className="card-title">Spécifications</div>
-            {[
-              ["ISBN-13", book.isbn],
-              ["Éditeur", "Actes Littéraires"],
-              ["Genre", book.genre],
-              ["Pagination", `${book.pages} pages`],
-              ["Gestion des droits", "DRM social"],
-            ].map(([k, v]) => (
-              <div key={k} className="flex justify-between py-2 border-b border-border text-[12.5px] last:border-b-0">
-                <span className="text-muted">{k}</span>
-                <span className="font-bold">{v}</span>
+
+          <div className="space-y-3">
+            {offresFiltrees.map((o) => (
+              <div key={o.id} className="card flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className={o.type === "papier" ? "pill-warning" : "pill-info"}>
+                      {o.type === "papier" ? <BookOpen size={11} className="inline mr-1" /> : <Smartphone size={11} className="inline mr-1" />}
+                      {o.type === "papier" ? "Livre broché" : "ePub / PDF"}
+                    </span>
+                    {o.prix === meilleurPrix && <span className="pill-success flex items-center gap-1"><Check size={11} /> Meilleur prix</span>}
+                  </div>
+                  <div className="font-bold text-[15px]">{o.vendeur}</div>
+                  <div className="text-muted text-xs flex items-center gap-3 flex-wrap mt-1">
+                    <span className="flex items-center gap-1"><MapPin size={12} /> {o.ville}</span>
+                    <span className="flex items-center gap-1"><Star size={12} className="text-warning" /> {o.note} ({o.avis} avis)</span>
+                    <span className="flex items-center gap-1"><Truck size={12} /> {o.delai}</span>
+                  </div>
+                  <Link to="/librairies" className="text-accent-dark text-[11.5px] font-bold flex items-center gap-1 mt-1.5 w-fit">
+                    Voir sur la carte des librairies <ChevronRight size={12} />
+                  </Link>
+                </div>
+                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
+                  <div className="font-head text-xl font-extrabold">{o.prix.toFixed(2)} €</div>
+                  <button className="btn-accent btn-sm">Ajouter au panier</button>
+                </div>
               </div>
             ))}
           </div>
+
+          <div className="card !p-3.5 mt-4 flex gap-2.5 items-start">
+            <ShieldCheck size={18} className="text-success shrink-0 mt-0.5" />
+            <div className="text-xs text-muted">
+              Chaque vendeur affiché est vérifié (KYB) par BookSpace.
+              Comparez prix, délais et avis librement avant de choisir —
+              votre paiement est réparti automatiquement et en toute
+              transparence vers le vendeur sélectionné.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Onglets */}
+      <div className="flex gap-6 border-b border-border mx-4 sm:mx-6 lg:mx-10 mt-9 text-sm overflow-x-auto">
+        {onglets.map((t, i) => (
+          <button key={t} onClick={() => definirOnglet(i)} className={`py-3 font-bold whitespace-nowrap ${i === onglet ? "text-ink border-b-2 border-accent" : "text-faint"}`}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4 sm:px-6 lg:px-10 py-7">
+        {onglet === 0 && <p className="text-muted text-[13.5px] leading-relaxed max-w-[720px]">{book.synopsis}</p>}
+        {onglet === 1 && (
+          <div className="max-w-[420px] text-sm">
+            {[["ISBN", book.isbn], ["Genre", book.genre], ["Pages", book.pages], ["Note moyenne", `${book.rating} / 5`]].map(([k, v]) => (
+              <div key={k} className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted">{k}</span><span className="font-bold">{v}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {onglet === 2 && <div className="text-muted text-sm">{book.reviews} avis vérifiés — sélectionnez un vendeur ci-dessus pour consulter ses avis spécifiques.</div>}
+      </div>
+
+      {/* Suggestions */}
+      <div className="px-4 sm:px-6 lg:px-10 pb-12">
+        <div className="section-title text-lg mb-4">Complétez votre bibliothèque</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {livres.filter((b) => b.id !== book.id).slice(0, 4).map((b) => (
+            <Link key={b.id} to={`/livre/${b.id}`} className="card !p-0 overflow-hidden">
+              <CouvertureLivre graine={b.id} className="rounded-none" />
+              <div className="p-3">
+                <Etoiles rating={b.rating} />
+                <div className="font-head font-bold text-[12.5px] mt-1 leading-tight">{b.title}</div>
+                <div className="text-faint text-[10.5px] mb-1.5">{b.author}</div>
+                <b className="text-accent text-sm">dès {b.pricePaper.toFixed(2)} €</b>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

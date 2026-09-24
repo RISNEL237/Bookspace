@@ -21,8 +21,11 @@ export default function PiedDePageClient() {
 
       <div className="bg-primary text-white/70 px-6 sm:px-10 py-10 text-[12.5px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <div className="max-w-[240px]">
-          <div className="font-head text-lg font-bold text-white mb-3">
-            Book<span className="text-accent">Space</span>
+          <div className="flex items-center gap-2 mb-3">
+            <img src="/logo-icon.png" alt="BookSpace" className="h-9 w-auto" />
+            <span className="font-head text-lg font-bold text-white">
+              Book<span className="text-accent">Space</span>
+            </span>
           </div>
           <div className="opacity-80">
             La première place de marché du livre papier et numérique, au
