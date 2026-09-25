@@ -6,19 +6,6 @@ import { Link } from "react-router-dom";
 export default function PiedDePageClient() {
   return (
     <div className="mt-auto">
-      {/* Bandeau promo */}
-      <div className="bg-accent text-white px-6 sm:px-10 py-6 sm:py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-        <div>
-          <div className="font-head text-xl sm:text-2xl font-extrabold">50% Sale !</div>
-          <div className="text-sm sm:text-base opacity-90">
-            Profitez de jusqu'à 50% de réduction sur une sélection chaque semaine
-          </div>
-        </div>
-        <Link to="/catalogue" className="btn bg-white text-accent hover:bg-white/90 shrink-0">
-          En profiter →
-        </Link>
-      </div>
-
       <div className="bg-primary text-white/70 px-6 sm:px-10 py-10 text-[12.5px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <div className="max-w-[240px]">
           <div className="flex items-center gap-2 mb-3">
@@ -35,30 +22,27 @@ export default function PiedDePageClient() {
         <div>
           <h4 className="text-white font-head text-sm font-bold mb-3">Explorer</h4>
           <div className="space-y-2">
-            <div>Nouveautés</div>
-            <div>Ma bibliothèque</div>
-            <div>Suivi de commande</div>
+            <Link to="/catalogue">Catalogue</Link>
+            <Link to="/compte/bibliotheque">Ma bibliothèque</Link>
+            <Link to="/compte/commandes">Suivi de commande</Link>
           </div>
         </div>
         <div>
           <h4 className="text-white font-head text-sm font-bold mb-3">Espace Vendeurs</h4>
           <div className="space-y-2">
-            <div>Devenir libraire partenaire</div>
-            <div>Portail vendeur</div>
-            <div>Charte qualité du réseau</div>
+            <Link to="/vendeur/inscription">Devenir vendeur partenaire</Link>
+            <Link to="/vendeur">Portail vendeur</Link>
           </div>
         </div>
         <div>
           <h4 className="text-white font-head text-sm font-bold mb-3">Engagements & Légal</h4>
           <div className="space-y-2">
-            <div>Respect du Prix Unique (Loi Lang)</div>
-            <div>Paiement Sécurisé DSP2</div>
-            <div>Mentions légales</div>
+            <Link to="/carnets-critiques">Carnets critiques</Link>
           </div>
         </div>
       </div>
       <div className="bg-primary border-t border-white/10 px-6 sm:px-10 py-4 text-white/50 text-[11px] text-center">
-        © 2025 BookSpace SAS. Tous droits réservés.
+        © {new Date().getFullYear()} BookSpace. Tous droits réservés.
       </div>
     </div>
   );

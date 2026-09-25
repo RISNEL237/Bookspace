@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -30,9 +32,9 @@ class PaymentController extends Controller
         foreach ($order->items as $item) {
             $lineItems[] = [
                 'price_data' => [
-                    'currency' => 'eur',
+                    'currency' => 'xaf',
                     'product_data' => ['name' => $item->offer?->book?->titre_livre ?? 'Article BookSpace'],
-                    'unit_amount' => (int) round((float) $item->prix_unitaire_fige * 100),
+                    'unit_amount' => (int) round((float) $item->prix_unitaire_fige),
                 ],
                 'quantity' => $item->quantite_commande,
             ];
@@ -97,21 +99,54 @@ class PaymentController extends Controller
                 ]);
                 $order->items()->each(function ($item) {
                     $item->update([
-                        'statut_ligne_commande' => $item->offer?->type_offre === 'numerique'
-                            ? 'disponible_telechargement'
-                            : 'en_preparation',
+                        'statut_ligne_commande' => $item->offer?->type_offre === 'numerique' ? 'disponible_telechargement' : 'payee',
+                        ...($item->offer?->type_offre === 'numerique' ? [] : ['date_limite_acceptation' => now()->addDays(15)]),
                     ]);
                 });
+                $this->notifySuccessfulPayment($order);
             }
         }
 
         return response()->json(['received' => true]);
     }
 
+    private function notifySuccessfulPayment(Order $order): void
+    {
+        $order->load('items.offer.book', 'items.offer.seller');
+        $notifications = app(NotificationService::class);
+        $notifications->sendOnce(
+            $order->id_client,
+            'paiement_confirme',
+            'Le paiement de votre commande a été confirmé.',
+            $order->id_commande
+        );
+
+        foreach ($order->items as $item) {
+            $title = $item->offer?->book?->titre_livre ?? 'un livre';
+            $sellerClientId = $item->offer?->seller?->id_client;
+            if ($sellerClientId) {
+                $notifications->sendOnce(
+                    $sellerClientId,
+                    'nouvelle_commande_payee',
+                    "Une commande payée contient « {$title} ». Préparez cette ligne de commande.",
+                    $item->id_ligne_commande
+                );
+            }
+            if ($item->offer?->type_offre === 'numerique') {
+                $notifications->sendOnce(
+                    $order->id_client,
+                    'ebook_disponible',
+                    "Votre e-book « {$title} » est disponible dans votre bibliothèque numérique.",
+                    $item->id_ligne_commande
+                );
+            }
+        }
+    }
     private function stripeSignatureParts(string $signature): array
     {
         $parts = collect(explode(',', $signature))->mapWithKeys(function (string $part) {
             [$key, $value] = array_pad(explode('=', $part, 2), 2, null);
+
             return [$key => $value];
         });
 
@@ -156,8 +191,8 @@ class PaymentController extends Controller
             'X-Target-Environment' => config('services.mtn_momo.target_environment', 'sandbox'),
             'Content-Type' => 'application/json',
         ])->post(rtrim($configuration['base_url'], '/').'/collection/v1_0/requesttopay', [
-            'amount' => number_format((float) $order->montant_total_commande, 2, '.', ''),
-            'currency' => 'EUR',
+            'amount' => number_format((float) $order->montant_total_commande, 0, '.', ''),
+            'currency' => 'XAF',
             'externalId' => $order->id_commande,
             'payer' => [
                 'partyIdType' => 'MSISDN',
@@ -189,6 +224,13 @@ class PaymentController extends Controller
         $clientId = $request->attributes->get('id_utilisateur');
         abort_unless($order->id_client === $clientId, 403, 'Cette commande ne vous appartient pas.');
 
+        $paymentExists = Payment::query()
+            ->where('id_commande', $order->id_commande)
+            ->where('fournisseur_paiement', 'mtn_momo')
+            ->where('id_transaction_externe', $reference)
+            ->exists();
+        abort_unless($paymentExists, 404, 'Cette rÃ©fÃ©rence ne correspond pas Ã  un paiement de cette commande.');
+
         $configuration = config('services.mtn_momo');
         $tokenResponse = Http::withHeaders([
             'Ocp-Apim-Subscription-Key' => $configuration['subscription_key'],
@@ -217,11 +259,27 @@ class PaymentController extends Controller
         };
 
         if ($providerStatus === 'SUCCESSFUL') {
-            $order->update(['statut_commande' => 'payee']);
-            Payment::where('id_commande', $order->id_commande)->update(['statut_paiement' => 'succes']);
+            DB::transaction(function () use ($order, $reference) {
+                $order->update(['statut_commande' => 'payee']);
+                Payment::where('id_commande', $order->id_commande)
+                    ->where('fournisseur_paiement', 'mtn_momo')
+                    ->where('id_transaction_externe', $reference)
+                    ->update(['statut_paiement' => 'succes']);
+
+                $order->items()->with('offer')->get()->each(function ($item) {
+                    $item->update([
+                        'statut_ligne_commande' => $item->offer?->type_offre === 'numerique' ? 'disponible_telechargement' : 'payee',
+                        ...($item->offer?->type_offre === 'numerique' ? [] : ['date_limite_acceptation' => now()->addDays(15)]),
+                    ]);
+                });
+                $this->notifySuccessfulPayment($order);
+            });
         } elseif ($providerStatus === 'FAILED') {
             $order->update(['statut_commande' => 'annulee']);
-            Payment::where('id_commande', $order->id_commande)->update(['statut_paiement' => 'echec']);
+            Payment::where('id_commande', $order->id_commande)
+                ->where('fournisseur_paiement', 'mtn_momo')
+                ->where('id_transaction_externe', $reference)
+                ->update(['statut_paiement' => 'echec']);
         }
 
         return response()->json([
@@ -229,7 +287,9 @@ class PaymentController extends Controller
             'provider_status' => $providerStatus,
         ]);
     }
-    public function camerpayWebhook(Request $request){
+
+    public function camerpayWebhook(Request $request)
+    {
         $hmacSecret = config('services.camerpay.hmac_secret');
         $apiToken = config('services.camerpay.api_token');
 
@@ -241,7 +301,7 @@ class PaymentController extends Controller
         $payload = $request->getContent();
         $expectedSignature = hash_hmac('sha256', $payload, $hmacSecret);
 
-        if (! hash_equals($expectedSignature, $signature)) {
+        if (! $signature || ! hash_equals($expectedSignature, $signature)) {
             return response()->json(['message' => 'Signature CamerPay invalide.'], 400);
         }
 
@@ -258,9 +318,11 @@ class PaymentController extends Controller
                     $item->update([
                         'statut_ligne_commande' => $item->offer?->type_offre === 'numerique'
                             ? 'disponible_telechargement'
-                            : 'en_preparation',
+                            : 'payee',
+                        ...($item->offer?->type_offre === 'numerique' ? [] : ['date_limite_acceptation' => now()->addDays(15)]),
                     ]);
                 });
+                $this->notifySuccessfulPayment($order);
             }
         }
 

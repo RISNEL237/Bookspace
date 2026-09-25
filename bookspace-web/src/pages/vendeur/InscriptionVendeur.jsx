@@ -1,114 +1,36 @@
-import { CheckCircle2, FileText } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
-// PAGE : Inscription vendeur / vérification KYB (/vendeur/inscription)
-// Étape de dépôt des justificatifs avant activation du compte.
-const steps = [
-  { n: "", label: "Type de structure", done: true },
-  { n: "2", label: "Vérification (KYB)", on: true },
-  { n: "3", label: "Compte de paiement" },
-  { n: "4", label: "Catalogue initial" },
-];
+import { applyAsSeller } from "../../lib/api";
+import { uploadPrivateFile } from "../../lib/storage";
+import CarteSelectionLocalisation from "../../components/maps/CarteSelectionLocalisation";
 
 export default function InscriptionVendeur() {
-  return (
-    <div className="min-h-screen bg-bg">
-      <div className="bg-surface border-b border-border px-8 py-4 flex items-center">
-        <Link to="/" className="font-head text-xl font-bold text-primary flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-accent inline-block" />
-          BookSpace
-          <span className="font-body text-muted font-medium text-sm ml-1.5">
-            Rejoindre le réseau vendeurs
-          </span>
-        </Link>
-        <div className="ml-auto text-sm text-muted">
-          Déjà partenaire ? <Link to="/login" className="font-bold text-primary">Se connecter</Link>
-        </div>
-      </div>
+  const [form, setForm] = useState({ nom_commercial: "", type_de_structure: "boutique", numero_commercial: "", city: "", country: "Cameroun", latitude: null, longitude: null });
+  const [pieceIdentite, setPieceIdentite] = useState(null);
+  const [erreur, setErreur] = useState("");
+  const [envoyee, setEnvoyee] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  function update(name, value) { setForm((current) => ({ ...current, [name]: value })); }
+  async function soumettre(event) {
+    event.preventDefault(); setErreur(""); setEnvoi(true);
+    try {
+      const piece_identite = await uploadPrivateFile("seller-documents", pieceIdentite, { maxBytes: 15 * 1024 * 1024, allowedTypes: ["application/pdf", "image/jpeg", "image/png"] });
+      await applyAsSeller({ nom_commercial: form.nom_commercial, type_de_structure: form.type_de_structure, numero_commercial: form.numero_commercial, city: form.city, country: form.country, latitude: form.latitude, longitude: form.longitude, piece_identite });
+      setEnvoyee(true);
+    } catch (error) { setErreur(error.message); } finally { setEnvoi(false); }
+  }
 
-      <div className="py-9 px-6">
-        <div className="flex justify-center items-center gap-0 mb-9 flex-wrap">
-          {steps.map((s, i) => (
-            <React.Fragment key={s.label}>
-              <div className="flex items-center gap-2.5">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${s.done ? "bg-success text-white" : s.on ? "bg-primary text-white" : "bg-surfaceAlt text-faint"}`}>
-                  {s.n}
-                </div>
-                <span className={`text-[12.5px] font-bold ${s.on ? "text-primary" : "text-faint"}`}>{s.label}</span>
-              </div>
-              {i < steps.length - 1 && <div className="w-[50px] h-px bg-border mx-3.5" />}
-            </React.Fragment>
-          ))}
-        </div>
-
-        <div className="max-w-[760px] mx-auto">
-          <div className="section-title text-center mb-1.5">Vérifions l'identité de votre structure</div>
-          <div className="text-muted text-sm text-center mb-7">
-            Ces informations garantissent la conformité DAC7 et sécurisent
-            les futurs versements.
-          </div>
-
-          <div className="card">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="field">
-                <label>Nom commercial</label>
-                <input className="input" defaultValue="Librairie de l'Odéon" />
-              </div>
-              <div className="field">
-                <label>Type de structure</label>
-                <input className="input" defaultValue="SARL — Librairie indépendante" />
-              </div>
-              <div className="field">
-                <label>SIRET / n° d'entreprise</label>
-                <input className="input" defaultValue="412 890 00021" />
-              </div>
-              <div className="field">
-                <label>Pays d'exercice</label>
-                <input className="input" defaultValue="France" />
-              </div>
-            </div>
-            <div className="h-px bg-border my-5" />
-            <div className="card-title text-sm">Documents justificatifs</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-              <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"></div>
-                <div>
-                  <div className="text-sm font-bold">Kbis (extrait)</div>
-                  <div className="text-faint text-xs">Vérifié automatiquement</div>
-                </div>
-              </div>
-              <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[10px] bg-success-bg text-success flex items-center justify-center"></div>
-                <div>
-                  <div className="text-sm font-bold">RIB / IBAN</div>
-                  <div className="text-faint text-xs">Format conforme</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-surfaceAlt border border-dashed border-borderStrong rounded-[10px] p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[10px] bg-warning-bg text-warning flex items-center justify-center"></div>
-              <div>
-                <div className="text-sm font-bold">Pièce d'identité du gérant</div>
-                <div className="text-faint text-xs">Glissez un fichier PDF ou JPG — 10 Mo max</div>
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2.5 text-sm text-muted mt-5">
-              <input type="checkbox" defaultChecked />
-              J'accepte la charte des librairies indépendantes et les
-              conditions vendeurs BookSpace
-            </label>
-
-            <div className="flex justify-between mt-6">
-              <button className="btn-outline">← Étape précédente</button>
-              <Link to="/vendeur" className="btn-primary">
-                Continuer vers le compte de paiement →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen bg-bg"><div className="bg-surface border-b border-border px-8 py-4"><Link to="/" className="font-head text-xl font-bold text-primary">BookSpace <span className="text-muted font-body text-sm font-medium">· Demande vendeur</span></Link></div>
+    <div className="py-9 px-6"><div className="max-w-[760px] mx-auto"><div className="section-title mb-1.5">Demande d'inscription vendeur</div><div className="text-muted text-sm mb-7">Votre demande sera examinée par un administrateur avant l'activation de la boutique. Connectez-vous à votre compte avant l'envoi.</div>
+      {erreur && <div role="alert" className="text-danger text-sm mb-4">{erreur}</div>}{envoyee ? <div role="status" className="card text-success">Votre demande a été envoyée. La boutique reste inactive pendant la vérification.</div> : <form onSubmit={soumettre} className="card"><div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="field"><label htmlFor="commercial">Nom commercial</label><input id="commercial" className="input" value={form.nom_commercial} maxLength={255} onChange={(e) => update("nom_commercial", e.target.value)} required /></div>
+        <div className="field"><label htmlFor="structure">Type de structure</label><select id="structure" className="input" value={form.type_de_structure} onChange={(e) => update("type_de_structure", e.target.value)}><option value="boutique">Boutique</option><option value="particulier">Particulier</option></select></div>
+        <div className="field"><label htmlFor="numero-commercial">Numéro commercial (facultatif)</label><input id="numero-commercial" className="input" value={form.numero_commercial} maxLength={100} onChange={(e) => update("numero_commercial", e.target.value)} /></div>
+        <div className="field"><label htmlFor="country">Pays</label><input id="country" className="input" value={form.country} maxLength={150} onChange={(e) => update("country", e.target.value)} required /></div>
+        <div className="field"><label htmlFor="city">Ville</label><input id="city" className="input" value={form.city} maxLength={150} onChange={(e) => update("city", e.target.value)} required /></div>
+        <div className="field sm:col-span-2"><label>Emplacement exact de la boutique</label><CarteSelectionLocalisation latitude={form.latitude} longitude={form.longitude} onChange={({ latitude, longitude }) => setForm((current) => ({ ...current, latitude, longitude }))} /><span className="text-faint text-xs">Coordonnées sélectionnées : {form.latitude != null ? `${form.latitude}, ${form.longitude}` : "aucun point choisi"}</span></div>
+        <div className="field sm:col-span-2"><label htmlFor="identity">Justificatif d'identité (PDF, JPG ou PNG · 15 Mo max.)</label><input id="identity" className="input" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => setPieceIdentite(e.target.files?.[0] ?? null)} required /><span className="text-faint text-xs">Le document sera enregistré dans un espace privé.</span></div>
+      </div><button type="submit" disabled={envoi || form.latitude == null || form.longitude == null} className="btn-primary mt-5 disabled:opacity-50">{envoi ? "Envoi…" : "Envoyer la demande"}</button></form>}
+    </div></div>
+  </div>;
 }

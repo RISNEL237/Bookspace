@@ -1,54 +1,58 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import { RequireAdmin, RequireApprovedSeller, RequireClient } from "./components/auth/RouteGuards";
+const EmailConfirmed = lazy(() => import("./pages/EmailConfirmed"));
 
-import DispositionClient from "./routes/DispositionClient";
-import DispositionCompte from "./routes/DispositionCompte";
-import DispositionVendeur from "./routes/DispositionVendeur";
-import DispositionAdmin from "./routes/DispositionAdmin";
+const DispositionClient = lazy(() => import("./routes/DispositionClient"));
+const DispositionCompte = lazy(() => import("./routes/DispositionCompte"));
+const DispositionVendeur = lazy(() => import("./routes/DispositionVendeur"));
+const DispositionAdmin = lazy(() => import("./routes/DispositionAdmin"));
 
 // client
-import Accueil from "./pages/client/Accueil";
-import Connexion from "./pages/client/Connexion";
-import Catalogue from "./pages/client/Catalogue";
-import FicheProduit from "./pages/client/FicheProduit";
-import Panier from "./pages/client/Panier";
-import Paiement from "./pages/client/Paiement";
-import ConfirmationCommande from "./pages/client/ConfirmationCommande";
-import VitrineVendeur from "./pages/client/VitrineVendeur";
-import CarteLibrairies from "./pages/client/CarteLibrairies";
-import CarnetsCritiques from "./pages/client/CarnetsCritiques";
-import TableauDeBordCompte from "./pages/client/TableauDeBordCompte";
-import ListeCommandesClient from "./pages/client/ListeCommandesClient";
-import SuiviCommande from "./pages/client/SuiviCommande";
-import BibliothequeNumerique from "./pages/client/BibliothequeNumerique";
-import ListeEnvies from "./pages/client/ListeEnvies";
-import Adresses from "./pages/client/Adresses";
-import ParametresCompte from "./pages/client/ParametresCompte";
+const Accueil = lazy(() => import("./pages/client/Accueil"));
+const Connexion = lazy(() => import("./pages/client/Connexion"));
+const Catalogue = lazy(() => import("./pages/client/Catalogue"));
+const FicheProduit = lazy(() => import("./pages/client/FicheProduit"));
+const Panier = lazy(() => import("./pages/client/Panier"));
+const Paiement = lazy(() => import("./pages/client/Paiement"));
+const ConfirmationCommande = lazy(() => import("./pages/client/ConfirmationCommande"));
+const VitrineVendeur = lazy(() => import("./pages/client/VitrineVendeur"));
+const CarteLibrairies = lazy(() => import("./pages/client/CarteLibrairies"));
+const CarnetsCritiques = lazy(() => import("./pages/client/CarnetsCritiques"));
+const TableauDeBordCompte = lazy(() => import("./pages/client/TableauDeBordCompte"));
+const ListeCommandesClient = lazy(() => import("./pages/client/ListeCommandesClient"));
+const SuiviCommande = lazy(() => import("./pages/client/SuiviCommande"));
+const BibliothequeNumerique = lazy(() => import("./pages/client/BibliothequeNumerique"));
+const ListeEnvies = lazy(() => import("./pages/client/ListeEnvies"));
+const Adresses = lazy(() => import("./pages/client/Adresses"));
+const ParametresCompte = lazy(() => import("./pages/client/ParametresCompte"));
+const Notifications = lazy(() => import("./pages/client/Notifications"));
 
 // vendor
-import InscriptionVendeur from "./pages/vendeur/InscriptionVendeur";
-import TableauDeBordVendeur from "./pages/vendeur/TableauDeBordVendeur";
-import LivresPhysiquesVendeur from "./pages/vendeur/LivresPhysiquesVendeur";
-import LivresNumeriquesVendeur from "./pages/vendeur/LivresNumeriquesVendeur";
-import AjouterLivre from "./pages/vendeur/AjouterLivre";
-import CommandesVendeur from "./pages/vendeur/CommandesVendeur";
-import GainsVendeur from "./pages/vendeur/GainsVendeur";
-import ParametresBoutique from "./pages/vendeur/ParametresBoutique";
+const InscriptionVendeur = lazy(() => import("./pages/vendeur/InscriptionVendeur"));
+const TableauDeBordVendeur = lazy(() => import("./pages/vendeur/TableauDeBordVendeur"));
+const LivresPhysiquesVendeur = lazy(() => import("./pages/vendeur/LivresPhysiquesVendeur"));
+const LivresNumeriquesVendeur = lazy(() => import("./pages/vendeur/LivresNumeriquesVendeur"));
+const AjouterLivre = lazy(() => import("./pages/vendeur/AjouterLivre"));
+const CommandesVendeur = lazy(() => import("./pages/vendeur/CommandesVendeur"));
+const GainsVendeur = lazy(() => import("./pages/vendeur/GainsVendeur"));
+const ParametresBoutique = lazy(() => import("./pages/vendeur/ParametresBoutique"));
 
 // admin
-import TableauDeBordAdmin from "./pages/admin/TableauDeBordAdmin";
-import VerificationVendeurs from "./pages/admin/VerificationVendeurs";
-import Moderation from "./pages/admin/Moderation";
-import Commissions from "./pages/admin/Commissions";
-import JournauxSecurite from "./pages/admin/JournauxSecurite";
+const TableauDeBordAdmin = lazy(() => import("./pages/admin/TableauDeBordAdmin"));
+const VerificationVendeurs = lazy(() => import("./pages/admin/VerificationVendeurs"));
+const Moderation = lazy(() => import("./pages/admin/Moderation"));
+const Commissions = lazy(() => import("./pages/admin/Commissions"));
+const JournauxSecurite = lazy(() => import("./pages/admin/JournauxSecurite"));
 
-import PageIntrouvable from "./pages/PageIntrouvable";
+const PageIntrouvable = lazy(() => import("./pages/PageIntrouvable"));
 
 // Composant racine : déclare toutes les routes (URLs) du site
 // et associe chaque URL à la page (composant) qui doit s'afficher.
 export default function Application() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="p-6 text-center text-muted">Chargement…</div>}>
+      <Routes>
       {/* Espace public / client */}
       <Route element={<DispositionClient />}>
         <Route path="/" element={<Accueil />} />
@@ -63,40 +67,49 @@ export default function Application() {
       </Route>
 
       <Route path="/login" element={<Connexion />} />
+      <Route path="/auth/confirmed" element={<EmailConfirmed />} />
 
       {/* Espace compte client */}
-      <Route path="/compte" element={<DispositionCompte />}>
-        <Route index element={<TableauDeBordCompte />} />
-        <Route path="commandes" element={<ListeCommandesClient />} />
-        <Route path="commandes/:id" element={<SuiviCommande />} />
-        <Route path="bibliotheque" element={<BibliothequeNumerique />} />
-        <Route path="envies" element={<ListeEnvies />} />
-        <Route path="adresses" element={<Adresses />} />
-        <Route path="parametres" element={<ParametresCompte />} />
+      <Route element={<RequireClient />}>
+        <Route path="/compte" element={<DispositionCompte />}>
+          <Route index element={<TableauDeBordCompte />} />
+          <Route path="commandes" element={<ListeCommandesClient />} />
+          <Route path="commandes/:id" element={<SuiviCommande />} />
+          <Route path="bibliotheque" element={<BibliothequeNumerique />} />
+          <Route path="envies" element={<ListeEnvies />} />
+          <Route path="adresses" element={<Adresses />} />
+          <Route path="parametres" element={<ParametresCompte />} />
+          <Route path="notifications" element={<Notifications />} />
+        </Route>
+        <Route path="/vendeur/inscription" element={<InscriptionVendeur />} />
       </Route>
 
       {/* Espace vendeur */}
-      <Route path="/vendeur/inscription" element={<InscriptionVendeur />} />
-      <Route path="/vendeur" element={<DispositionVendeur />}>
-        <Route index element={<TableauDeBordVendeur />} />
-        <Route path="livres-physiques" element={<LivresPhysiquesVendeur />} />
-        <Route path="livres-numeriques" element={<LivresNumeriquesVendeur />} />
-        <Route path="livres/nouveau" element={<AjouterLivre />} />
-        <Route path="commandes" element={<CommandesVendeur />} />
-        <Route path="gains" element={<GainsVendeur />} />
-        <Route path="parametres" element={<ParametresBoutique />} />
+      <Route element={<RequireApprovedSeller />}>
+        <Route path="/vendeur" element={<DispositionVendeur />}>
+          <Route index element={<TableauDeBordVendeur />} />
+          <Route path="livres-physiques" element={<LivresPhysiquesVendeur />} />
+          <Route path="livres-numeriques" element={<LivresNumeriquesVendeur />} />
+          <Route path="livres/nouveau" element={<AjouterLivre />} />
+          <Route path="commandes" element={<CommandesVendeur />} />
+          <Route path="gains" element={<GainsVendeur />} />
+          <Route path="parametres" element={<ParametresBoutique />} />
+        </Route>
       </Route>
 
       {/* Espace administrateur */}
-      <Route path="/admin" element={<DispositionAdmin />}>
-        <Route index element={<TableauDeBordAdmin />} />
-        <Route path="verification" element={<VerificationVendeurs />} />
-        <Route path="moderation" element={<Moderation />} />
-        <Route path="commissions" element={<Commissions />} />
-        <Route path="logs" element={<JournauxSecurite />} />
+      <Route element={<RequireAdmin />}>
+        <Route path="/admin" element={<DispositionAdmin />}>
+          <Route index element={<TableauDeBordAdmin />} />
+          <Route path="verification" element={<VerificationVendeurs />} />
+          <Route path="moderation" element={<Moderation />} />
+          <Route path="commissions" element={<Commissions />} />
+          <Route path="logs" element={<JournauxSecurite />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<PageIntrouvable />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

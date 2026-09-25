@@ -1,6 +1,6 @@
-import { Search as SearchIcn, Cloud, Download, BookOpen, ShieldCheck, Smartphone } from "lucide-react";
+import { Download } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchDigitalLibrary } from "../../lib/api";
+import { fetchDigitalBookDownloadLink, fetchDigitalLibrary } from "../../lib/api";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 
 // PAGE : Bibliothèque numérique (/compte/bibliotheque)
@@ -9,6 +9,7 @@ export default function BibliothequeNumerique() {
   const [livres, definirLivres] = useState([]);
   const [recherche, definirRecherche] = useState("");
   const [erreur, definirErreur] = useState("");
+  const [telechargement, definirTelechargement] = useState(null);
 
   useEffect(() => {
     fetchDigitalLibrary()
@@ -21,6 +22,19 @@ export default function BibliothequeNumerique() {
     [livres, recherche]
   );
 
+  async function telecharger(id) {
+    definirErreur("");
+    definirTelechargement(id);
+    try {
+      const { url } = await fetchDigitalBookDownloadLink(id);
+      window.location.assign(url);
+    } catch (error) {
+      definirErreur(error.message);
+    } finally {
+      definirTelechargement(null);
+    }
+  }
+
   return (
     <div>
       <div className="flex justify-between items-start mb-1">
@@ -30,10 +44,6 @@ export default function BibliothequeNumerique() {
             Retrouvez l'ensemble de vos acquisitions numériques prêtes au
             téléchargement et synchronisées.
           </div>
-        </div>
-        <div className="card !p-3.5 text-right">
-          <div className="text-xs text-muted">Espace cloud</div>
-          <div className="font-bold text-primary">26.1 Mo / 100 Mo</div>
         </div>
       </div>
 
@@ -60,7 +70,7 @@ export default function BibliothequeNumerique() {
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="pill-muted mb-1.5 inline-block">{b.seller || "BookSpace"}</span>
+                    <span className="pill-muted mb-1.5 inline-block">{b.seller}</span>
                     <div className="font-head font-bold">{b.title}</div>
                     <div className="text-muted text-sm">{b.author}</div>
                   </div>
@@ -70,8 +80,7 @@ export default function BibliothequeNumerique() {
                   Acheté le {b.purchased ? new Date(b.purchased).toLocaleDateString("fr-FR") : "-"} · Format {b.format}
                 </div>
                 <div className="flex gap-2.5">
-                  <button className="btn-primary btn-sm"><Download size={13} className="inline mr-1"/> Télécharger</button>
-                  <button className="btn-outline btn-sm">Lire en ligne</button>
+                  <button type="button" disabled={!b.download_available || telechargement === b.id} onClick={() => telecharger(b.id)} className="btn-primary btn-sm disabled:opacity-50"><Download size={13} className="inline mr-1"/> {telechargement === b.id ? "Préparation du lien…" : b.download_available ? "Télécharger" : "Téléchargement indisponible"}</button>
                 </div>
               </div>
             </div>
@@ -80,21 +89,9 @@ export default function BibliothequeNumerique() {
 
         <div className="w-full md:w-[320px] shrink-0 space-y-5">
           <div className="card">
-            <div className="card-title">Vos fichiers sont protégés</div>
+            <div className="card-title">Accès aux fichiers</div>
             <div className="text-muted text-sm">
-              Chaque fichier intègre un tatouage numérique (DRM social) lié à
-              votre compte. Téléchargements illimités, licence active et
-              perpétuelle.
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-title"><Smartphone size={16} className="inline mr-1.5"/> Compatibilité liseuses</div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {["Vivlio", "Kobo / Tolino", "Kindle (Send-to)", "Apple Books"].map((l) => (
-                <div key={l} className="flex items-center gap-1.5">
-                  <span className="text-success">✓</span> {l}
-                </div>
-              ))}
+              Chaque demande est vérifiée côté serveur et reçoit un lien temporaire. Le bucket de stockage doit rester privé.
             </div>
           </div>
         </div>

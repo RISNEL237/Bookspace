@@ -52,11 +52,11 @@ export function addToCart(item = {}) {
   return cart;
 }
 
-export function updateCartItemQuantity(id, format, delta) {
+export function updateCartItemQuantity(id, format, delta, offerId) {
   const cart = getCartItems();
   const next = cart
     .map((item) => {
-      if (item.id !== id || item.format !== format) {
+      if (item.id !== id || item.format !== format || (offerId && item.offerId !== offerId)) {
         return item;
       }
 
@@ -68,9 +68,9 @@ export function updateCartItemQuantity(id, format, delta) {
   return next;
 }
 
-export function removeCartItem(id, format) {
+export function removeCartItem(id, format, offerId) {
   const next = getCartItems().filter(
-    (item) => !(item.id === id && item.format === format)
+    (item) => !(item.id === id && item.format === format && (!offerId || item.offerId === offerId))
   );
 
   saveCartItems(next);

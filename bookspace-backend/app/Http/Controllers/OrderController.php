@@ -6,6 +6,7 @@ use App\Models\Offer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -52,7 +53,7 @@ class OrderController extends Controller
             'items.*.seller_id' => ['nullable', 'uuid'],
             'items.*.format' => ['nullable', 'string'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'payment_provider' => ['nullable', 'in:stripe,mtn_momo,orange_money'],
+            'payment_provider' => ['nullable', 'in:paypal,mtn_momo,orange_money'],
             'payment_phone' => ['nullable', 'string', 'max:20'],
         ]);
 
@@ -83,7 +84,7 @@ class OrderController extends Controller
                 'quantity' => (int) $item['quantity'],
                 'delivery_mode' => $offer->type_offre === 'numerique'
                     ? 'telechargement'
-                    : ((float) ($item['shipping_fee'] ?? 0) > 0 ? 'domicile' : 'retrait'),
+                    : 'retrait',
             ];
         });
 
@@ -94,7 +95,7 @@ class OrderController extends Controller
                 'id_commande' => (string) Str::uuid(),
                 'id_client' => $clientId,
                 'statut_commande' => 'en_attente',
-                'montant_total_commande' => number_format($total, 2, '.', ''),
+                'montant_total_commande' => number_format($total, 0, '.', ''),
             ]);
 
             foreach ($resolvedItems as $item) {
@@ -103,16 +104,16 @@ class OrderController extends Controller
                     'id_commande' => $order->id_commande,
                     'id_offre' => $item['offer']->id_offre,
                     'quantite_commande' => $item['quantity'],
-                    'prix_unitaire_fige' => number_format($item['offer']->prix_offre, 2, '.', ''),
+                    'prix_unitaire_fige' => number_format($item['offer']->prix_offre, 0, '.', ''),
                     'mode_livraison' => $item['delivery_mode'],
-                    'statut_ligne_commande' => 'payee',
+                    'statut_ligne_commande' => 'en_attente_paiement',
                 ]);
             }
 
             Payment::create([
                 'id_paiement' => (string) Str::uuid(),
                 'id_commande' => $order->id_commande,
-                'fournisseur_paiement' => $validated['payment_provider'] ?? 'stripe',
+                'fournisseur_paiement' => $validated['payment_provider'] ?? 'mtn_momo',
                 'tel_paiement' => $validated['payment_phone'] ?? null,
                 'montant_paiement' => number_format($total, 2, '.', ''),
                 'statut_paiement' => 'en_attente',
@@ -129,23 +130,67 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($order->load('items.offer.book', 'items.offer.seller')));
     }
 
-    public function update(Request $request, Order $order)
+    public function updateSellerLine(Request $request, OrderItem $line)
     {
-        $validated = $request->validate([
-            'status' => ['required', 'in:pending,paid,delivered,cancelled,en_attente,payee,expediee,livree,annulee,remboursee'],
-        ]);
+        $sellerId = DB::table('profil_vendeur')->where('id_client', $request->attributes->get('id_utilisateur'))->value('id_vendeur');
+        abort_unless($sellerId && $line->offer()->where('id_vendeur', $sellerId)->exists(), 403, 'Cette ligne ne relève pas de votre boutique.');
+        abort_unless($line->order()->value('statut_commande') === 'payee', 422, 'Le paiement de la commande doit être confirmé avant son traitement.');
+        $validated = $request->validate(['status' => ['required', 'in:en_preparation,en_expedition']]);
+        $allowed = $line->statut_ligne_commande === 'payee' && $validated['status'] === 'en_preparation'
+            || $line->statut_ligne_commande === 'en_preparation' && $validated['status'] === 'en_expedition';
+        abort_unless($allowed, 422, 'Cette transition de statut est invalide.');
 
-        $order->update(['statut_commande' => $this->toSchemaStatus($validated['status'])]);
+        DB::transaction(function () use ($line, $validated) {
+            $line->update(['statut_ligne_commande' => $validated['status']]);
+            $order = $line->order()->with('items')->first();
+            $bookTitle = $line->offer()->with('book')->first()?->book?->titre_livre ?? 'Votre livre';
+            $statusMessage = $validated['status'] === 'en_preparation'
+                ? "Le vendeur prépare « {$bookTitle} » pour votre commande."
+                : "Le vendeur a expédié « {$bookTitle} ».";
+            app(NotificationService::class)->sendOnce(
+                $order->id_client,
+                $validated['status'] === 'en_preparation' ? 'commande_preparation' : 'commande_expediee',
+                $statusMessage,
+                $line->id_ligne_commande
+            );
+            if ($order->items->every(fn ($item) => in_array($item->statut_ligne_commande, ['en_expedition', 'livree', 'fond_reverse', 'disponible_telechargement', 'remboursee'], true))) {
+                $order->update(['statut_commande' => 'expediee']);
+            }
+        });
 
-        return response()->json($this->serializeOrder($order->fresh()->load('items.offer.book', 'items.offer.seller')));
+        return response()->json($this->serializeSellerItem($line->fresh()->load('order.client', 'offer.book', 'offer.seller')));
     }
 
-    public function destroy(Order $order)
+    public function confirmDelivery(Request $request, Order $order)
     {
-        $this->ensureClientCanView($order);
-        $order->delete();
+        abort_unless($order->id_client === $request->attributes->get('id_utilisateur'), 403, 'Cette commande ne vous appartient pas.');
+        $validated = $request->validate(['line_id' => ['required', 'uuid']]);
+        $line = $order->items()->where('id_ligne_commande', $validated['line_id'])->firstOrFail();
+        abort_unless($line->statut_ligne_commande === 'en_expedition', 422, 'Seule une ligne expédiée peut être marquée livrée.');
 
-        return response()->noContent();
+        DB::transaction(function () use ($line, $order) {
+            $line->update(['statut_ligne_commande' => 'livree']);
+            $sellerClientId = $line->offer()->with('seller')->first()?->seller?->id_client;
+            if ($sellerClientId) {
+                app(NotificationService::class)->sendOnce(
+                    $sellerClientId,
+                    'commande_reception_confirmee',
+                    'Le client a confirmé la réception de sa commande.',
+                    $line->id_ligne_commande
+                );
+            }
+            if ($order->items()->whereNotIn('statut_ligne_commande', ['livree', 'fond_reverse', 'remboursee', 'disponible_telechargement'])->doesntExist()) {
+                $order->update(['statut_commande' => 'livree']);
+                app(NotificationService::class)->sendOnce(
+                    $order->id_client,
+                    'commande_livree',
+                    'Toutes les lignes physiques de votre commande ont été livrées.',
+                    $order->id_commande
+                );
+            }
+        });
+
+        return response()->json(['status' => 'livree']);
     }
 
     private function resolveOffer(array $item): ?Offer
@@ -174,17 +219,6 @@ class OrderController extends Controller
         abort_unless($order->id_client === request()->attributes->get('id_utilisateur'), 403, 'Cette commande ne vous appartient pas.');
     }
 
-    private function toSchemaStatus(string $status): string
-    {
-        return match ($status) {
-            'pending' => 'en_attente',
-            'paid' => 'payee',
-            'delivered' => 'livree',
-            'cancelled' => 'annulee',
-            default => $status,
-        };
-    }
-
     private function serializeOrder(Order $order): array
     {
         return [
@@ -208,6 +242,7 @@ class OrderController extends Controller
                 'format' => $item->offer?->type_offre === 'numerique' ? 'E-pub / PDF' : 'Livre broché',
                 'quantity' => $item->quantite_commande,
                 'unit_price' => $item->prix_unitaire_fige,
+                'delivery_mode' => $item->mode_livraison,
                 'shipping_fee' => 0,
                 'status' => $item->statut_ligne_commande,
                 'book' => $item->offer?->book ? [
@@ -230,6 +265,8 @@ class OrderController extends Controller
             'id' => $item->id_ligne_commande,
             'order_id' => $item->id_commande,
             'quantity' => $item->quantite_commande,
+            'unit_price' => $item->prix_unitaire_fige,
+            'delivery_mode' => $item->mode_livraison,
             'shipping_fee' => 0,
             'status' => $item->statut_ligne_commande,
             'book' => $item->offer?->book ? [

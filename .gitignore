@@ -6,8 +6,8 @@ bookspace-backend/vendor/
 bookspace-backend/node_modules/
 
 bookspace-backend/.env
-bookspace-backend/.env.backup
-bookspace-backend/.env.production
+bookspace-backend/.env.*
+!bookspace-backend/.env.example
 
 bookspace-backend/storage/*.key
 bookspace-backend/storage/logs/*
@@ -19,12 +19,12 @@ bookspace-backend/storage/framework/views/*
 # React / Vite Frontend
 # =========================
 
-bookspace-frontend/node_modules/
-bookspace-frontend/dist/
+bookspace-web/node_modules/
+bookspace-web/dist/
 
-bookspace-frontend/.env
-bookspace-frontend/.env.local
-bookspace-frontend/.env.production
+bookspace-web/.env
+bookspace-web/.env.*
+!bookspace-web/.env.example
 
 # =========================
 # IDE

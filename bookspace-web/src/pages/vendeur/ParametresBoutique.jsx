@@ -1,59 +1,35 @@
-import { CreditCard } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchSellerProfile, updateSellerProfile } from "../../lib/api";
+import CarteSelectionLocalisation from "../../components/maps/CarteSelectionLocalisation";
 
-// PAGE : Paramètres de la boutique (/vendeur/parametres)
 export default function ParametresBoutique() {
-  return (
-    <div>
-      <div className="section-title mb-6">Paramètres boutique</div>
-      <div className="flex flex-col md:flex-row gap-6 items-start">
-        <div className="flex-1 space-y-5 w-full">
-          <div className="card">
-            <div className="card-title">Informations de la boutique</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="field">
-                <label>Nom commercial</label>
-                <input className="input" defaultValue="Librairie Delamain" />
-              </div>
-              <div className="field">
-                <label>Ville</label>
-                <input className="input" defaultValue="Paris 1er" />
-              </div>
-              <div className="field sm:col-span-2">
-                <label>Description publique</label>
-                <input className="input" defaultValue="Librairie indépendante fondée en 1700, spécialisée en littérature classique et contemporaine." />
-              </div>
-            </div>
-            <button className="btn-primary btn-sm">Enregistrer</button>
-          </div>
+  const [boutique, setBoutique] = useState({ shop_name: "", description: "", city: "", country: "", latitude: null, longitude: null });
+  const [chargement, setChargement] = useState(true);
+  const [enregistrement, setEnregistrement] = useState(false);
+  const [erreur, setErreur] = useState("");
+  const [message, setMessage] = useState("");
 
-          <div className="card">
-            <div className="card-title">Options de livraison</div>
-            {["Colissimo recommandé", "Click & Collect en boutique", "Livraison express 24h"].map((o) => (
-              <label key={o} className="flex items-center justify-between text-sm py-2 border-b border-border last:border-b-0">
-                {o}
-                <input type="checkbox" defaultChecked />
-              </label>
-            ))}
-          </div>
-        </div>
+  useEffect(() => {
+    fetchSellerProfile().then((seller) => setBoutique({ shop_name: seller.shop_name || "", description: seller.description || "", city: seller.city || "", country: seller.country || "", latitude: seller.latitude ?? null, longitude: seller.longitude ?? null }))
+      .catch((error) => setErreur(error.message)).finally(() => setChargement(false));
+  }, []);
 
-        <div className="w-full md:w-[320px] shrink-0 space-y-5">
-          <div className="card">
-            <div className="card-title"> Compte de paiement</div>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted">Stripe Connect</span>
-              <span className="pill-success">Vérifié</span>
-            </div>
-            <div className="text-faint text-xs">IBAN se terminant par •• 4417</div>
-          </div>
-          <div className="card">
-            <div className="card-title">Équipe</div>
-            <div className="text-sm text-muted mb-3">2 membres ont accès à ce compte</div>
-            <button className="btn-outline btn-sm w-full">Gérer les accès</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  async function enregistrer(event) {
+    event.preventDefault(); setErreur(""); setMessage(""); setEnregistrement(true);
+    try {
+      const seller = await updateSellerProfile({ nom_commercial: boutique.shop_name, description_boutique: boutique.description, localisation: { city: boutique.city, country: boutique.country, latitude: boutique.latitude, longitude: boutique.longitude } });
+      setBoutique({ shop_name: seller.shop_name || "", description: seller.description || "", city: seller.city || "", country: seller.country || "", latitude: seller.latitude ?? null, longitude: seller.longitude ?? null });
+      setMessage("Les informations de la boutique ont été enregistrées.");
+    } catch (error) { setErreur(error.message); } finally { setEnregistrement(false); }
+  }
+
+  return <div><div className="section-title mb-6">Paramètres boutique</div>{erreur && <div role="alert" className="text-danger text-sm mb-4">{erreur}</div>}{message && <div role="status" className="text-success text-sm mb-4">{message}</div>}
+    <form onSubmit={enregistrer} className="card max-w-3xl"><div className="card-title">Informations de la boutique</div>{chargement ? <div className="text-muted text-sm">Chargement…</div> : <>
+      <div className="field"><label htmlFor="nom-boutique">Nom commercial</label><input id="nom-boutique" className="input" value={boutique.shop_name} maxLength={255} required onChange={(event) => setBoutique({ ...boutique, shop_name: event.target.value })} /></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="field"><label htmlFor="ville-boutique">Ville</label><input id="ville-boutique" className="input" value={boutique.city} maxLength={150} onChange={(event) => setBoutique({ ...boutique, city: event.target.value })} /></div><div className="field"><label htmlFor="pays-boutique">Pays</label><input id="pays-boutique" className="input" value={boutique.country} maxLength={150} onChange={(event) => setBoutique({ ...boutique, country: event.target.value })} /></div></div>
+      <div className="field"><label>Emplacement exact de la boutique</label><CarteSelectionLocalisation latitude={boutique.latitude} longitude={boutique.longitude} onChange={({ latitude, longitude }) => setBoutique((current) => ({ ...current, latitude, longitude }))} /><span className="text-faint text-xs">Coordonnées : {boutique.latitude != null ? `${boutique.latitude}, ${boutique.longitude}` : "aucun point choisi"}</span></div>
+      <div className="field"><label htmlFor="description-boutique">Description publique</label><textarea id="description-boutique" className="input" rows={4} maxLength={5000} value={boutique.description} onChange={(event) => setBoutique({ ...boutique, description: event.target.value })} /></div>
+      <button type="submit" disabled={enregistrement} className="btn-primary btn-sm disabled:opacity-60">{enregistrement ? "Enregistrement…" : "Enregistrer"}</button>
+    </>}</form>
+  </div>;
 }

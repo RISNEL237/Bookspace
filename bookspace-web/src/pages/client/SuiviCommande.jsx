@@ -1,95 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchOrderById } from "../../lib/api";
+import { confirmOrderDelivery, fetchOrderById } from "../../lib/api";
 import { FilAriane } from "../../components/ui/Composants";
-import { Package, Truck, Home, CheckCircle2, Map, Phone } from "lucide-react";
+import { Package } from "lucide-react";
 
-// PAGE : Suivi détaillé d'une commande (/compte/commandes/:id)
-// Affiche une frise chronologique (timeline) de livraison.
-const steps = [
-  { icon: <CheckCircle2 size={13} />, title: "Commande confirmée", desc: "Paiement validé, transmise à la librairie", done: true },
-  { icon: <CheckCircle2 size={13} />, title: "Colis préparé & emballé", desc: "Emballage éco-responsable renforcé", done: true },
-  { icon: <Truck size={13} />, title: "En transit — Colissimo", desc: "Pris en charge par le transporteur, centre de tri Paris", current: true },
-  { icon: <Home size={13} />, title: "Livraison à domicile", desc: "Estimée le 21 février 2025", done: false },
-];
+const statuts = {
+  en_attente_paiement: "En attente de paiement",
+  payee: "Paiement confirmé",
+  en_preparation: "En préparation",
+  en_expedition: "Expédiée",
+  livree: "Livrée",
+  fond_reverse: "Fonds reversés",
+  remboursee: "Remboursée",
+  disponible_telechargement: "Téléchargement disponible",
+};
 
 export default function SuiviCommande() {
   const { id } = useParams();
-  const [order, setOrder] = useState(null);
+  const [commande, setCommande] = useState(null);
   const [erreur, setErreur] = useState("");
+  const [validation, setValidation] = useState(null);
+  useEffect(() => { fetchOrderById(id).then(setCommande).catch((error) => setErreur(error.message)); }, [id]);
+  if (erreur) return <div className="px-4 py-10 text-danger">{erreur}</div>;
+  if (!commande) return <div className="px-4 py-10 text-muted">Chargement de la commande…</div>;
 
-  useEffect(() => {
-    fetchOrderById(id)
-      .then(setOrder)
-      .catch((error) => setErreur(error.message));
-  }, [id]);
-
-  if (erreur) {
-    return <div className="px-4 sm:px-6 lg:px-10 py-10 text-danger">{erreur}</div>;
+  async function confirmerReception(lineId) {
+    setErreur(""); setValidation(lineId);
+    try {
+      await confirmOrderDelivery(commande.id, lineId);
+      setCommande((current) => ({ ...current, items: current.items.map((item) => item.id === lineId ? { ...item, status: "livree" } : item) }));
+    } catch (error) { setErreur(error.message); } finally { setValidation(null); }
   }
 
-  if (!order) {
-    return <div className="px-4 sm:px-6 lg:px-10 py-10 text-muted">Chargement de la commande…</div>;
-  }
-
-  const premierArticle = order.items?.[0];
-  const titre = premierArticle?.book?.title || `${order.items?.length || 0} article(s)`;
-  const vendeur = premierArticle?.seller?.shop_name || "Vendeur BookSpace";
-
-  return (
-    <div>
-      <FilAriane items={[{ label: "Mon compte", to: "/compte" }, { label: "Mes commandes", to: "/compte/commandes" }, { label: `#${order.id}` }]} />
-      <div className="flex flex-col md:flex-row gap-7 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
-        <div className="flex-[1.5]">
-          <div className="flex justify-between items-start mb-1">
-            <div className="section-title">Suivi de la commande #{order.id}</div>
-            <span className="pill-info">En transit</span>
-          </div>
-          <div className="text-muted text-sm mb-5">
-            {titre} · Expédié par {vendeur}
-          </div>
-
-          <div className="card">
-            <div className="card-title flex items-center gap-2"><Package size={16}/> Historique de livraison</div>
-            <div className="relative pl-9 mt-5">
-              <div className="absolute left-[11px] top-1.5 bottom-1.5 w-0.5 bg-border" />
-              {steps.map((s, i) => (
-                <div key={i} className="relative pb-7 last:pb-0">
-                  <div
-                    className={`absolute -left-9 top-0 w-6 h-6 rounded-full flex items-center justify-center text-xs
-                    ${s.current ? "bg-primary text-white" : s.done ? "bg-success text-white" : "bg-surfaceAlt text-faint border-2 border-borderStrong"}`}
-                  >
-                    {s.icon}
-                  </div>
-                  <div className="font-bold text-sm mb-0.5">{s.title}</div>
-                  <div className="text-muted text-sm">{s.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full md:w-[340px] shrink-0">
-          <div className="h-[180px] bg-surfaceAlt rounded flex flex-col items-center justify-center gap-2 text-faint text-sm border border-dashed border-borderStrong mb-4.5"><Map size={24}/><span>Carte de suivi du colis</span>
-            
-          </div>
-          <div className="card">
-            <div className="card-title">Détails de l'envoi</div>
-            {[
-              ["Transporteur", "Colissimo Suivi"],
-              ["N° de suivi", "8L0234 5671 09FR"],
-              ["Adresse", "14 Rue de l'Odéon, Paris"],
-              ["Livraison estimée", "21 février 2025"],
-            ].map(([k, v]) => (
-              <div key={k} className="flex justify-between text-[12.5px] py-2 border-b border-border last:border-b-0">
-                <span className="text-muted">{k}</span>
-                <span className="font-bold">{v}</span>
-              </div>
-            ))}
-            <button className="btn-outline btn-sm w-full mt-3.5"><Phone size={13} className="inline mr-1.5"/> Contacter la librairie</button>
-          </div>
-        </div>
-      </div>
+  return <div><FilAriane items={[{ label: "Mon compte", to: "/compte" }, { label: "Mes commandes", to: "/compte/commandes" }, { label: `#${commande.id}` }]} />
+    <div className="px-4 sm:px-6 lg:px-10 pt-6 pb-10"><div className="section-title">Commande #{commande.id}</div><div className="text-muted text-sm mb-5">État : {commande.status} · {commande.created_at ? new Date(commande.created_at).toLocaleDateString("fr-FR") : ""}</div>
+      <div className="card"><div className="card-title flex items-center gap-2"><Package size={16} />Articles</div>{(commande.items || []).map((item) => <div key={item.id} className="flex justify-between items-center gap-4 py-3 border-b border-border last:border-0"><div><b>{item.book?.title || "Livre"}</b><div className="text-muted text-sm">{item.delivery_mode === "telechargement" ? "Numérique" : item.delivery_mode === "domicile" ? "Livraison à domicile" : "Retrait"}</div></div><div className="flex items-center gap-3"><span className="pill-info">{statuts[item.status] || item.status}</span>{item.status === "en_expedition" && <button type="button" disabled={validation === item.id} onClick={() => confirmerReception(item.id)} className="btn-outline btn-sm disabled:opacity-50">Confirmer la réception</button>}</div></div>)}</div>
+      <div className="text-muted text-sm mt-4">Les informations de transport et de suivi seront affichées lorsqu’elles seront disponibles auprès du vendeur.</div>
     </div>
-  );
+  </div>;
 }

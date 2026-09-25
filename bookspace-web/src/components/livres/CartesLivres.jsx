@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CouvertureLivre from "../ui/CouvertureLivre";
 import { Etoiles } from "../ui/Composants";
 import { Store, ArrowRight } from "lucide-react";
+import { formatMoney } from "../../lib/api";
 
 // Cartes d'affichage d'un livre, utilisées dans les grilles
 // (page d'accueil, catalogue, résultats de recherche).
@@ -24,7 +25,7 @@ export function CarteLivreGrille({ book }) {
         <div className="flex items-center justify-between mt-2.5">
           <div className="text-sm">
             <span className="text-faint text-[10px] block leading-none mb-0.5">dès</span>
-            <b className="font-head text-base text-accent">{book.priceEbook.toFixed(2)} €</b>
+            <b className="font-head text-base text-accent">{formatMoney(book.priceEbook || book.pricePaper)}</b>
           </div>
           <Link to={`/livre/${book.id}`} className="btn-accent btn-sm flex items-center gap-1.5">
             <Store size={13} /> Voir les offres
@@ -44,7 +45,7 @@ export function CarteLivreResultat({ book }) {
         <div className="text-[11.5px] text-muted mb-2">{book.author}</div>
         <Etoiles rating={book.rating} />
         <div className="flex justify-between items-center mt-2.5">
-          <b className="font-head text-[15px] text-accent">dès {book.priceEbook.toFixed(2)} €</b>
+          <b className="font-head text-[15px] text-accent">dès {formatMoney(book.priceEbook || book.pricePaper)}</b>
           <span className="text-accent-dark flex items-center gap-0.5 text-xs font-bold">
             Voir <ArrowRight size={12} />
           </span>

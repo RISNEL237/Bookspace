@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequireApprovedSeller;
+use App\Http\Middleware\VerifySupabaseToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,10 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            
+
         ]);
         $middleware->alias([
-            'supabase.auth' => \App\Http\Middleware\VerifySupabaseToken::class,
+            'supabase.auth' => VerifySupabaseToken::class,
+            'seller.approved' => RequireApprovedSeller::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

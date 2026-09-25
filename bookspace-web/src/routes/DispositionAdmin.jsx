@@ -8,8 +8,8 @@ import { LayoutGrid, ShieldCheck, Flag, Percent, FileClock } from "lucide-react"
 // + menu latéral admin + contenu de la page.
 const links = [
   { to: "/admin", end: true, icon: <LayoutGrid size={13} />, label: "Vue d'ensemble" },
-  { to: "/admin/verification", icon: <ShieldCheck size={13} />, label: "Vérification vendeurs", badge: "12" },
-  { to: "/admin/moderation", icon: <Flag size={13} />, label: "Modération & signalements", badge: "4" },
+  { to: "/admin/verification", icon: <ShieldCheck size={13} />, label: "Vérification vendeurs" },
+  { to: "/admin/moderation", icon: <Flag size={13} />, label: "Modération & signalements" },
   { to: "/admin/commissions", icon: <Percent size={13} />, label: "Commissions & règles" },
   { to: "/admin/logs", icon: <FileClock size={13} />, label: "Journaux de sécurité" },
 ];
@@ -20,7 +20,6 @@ export default function DispositionAdmin() {
       <BarreNavigationPortail
         dark="bg-[#14201A]"
         portalName="Console d'administration"
-        badge="Session sécurisée · Niveau 4"
         initials="SA"
       />
       <div className="flex flex-col lg:flex-row flex-1">

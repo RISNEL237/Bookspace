@@ -1,6 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchSellerPayouts } from "../../lib/api";
+import { fetchSellerPayouts, formatMoney } from "../../lib/api";
 import { CarteIndicateur } from "../../components/ui/Composants";
 
 // PAGE : Gains et versements (/vendeur/gains)
@@ -28,8 +28,8 @@ export default function GainsVendeur() {
     <div>
       <div className="section-title mb-5">Gains & versements</div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
-        <CarteIndicateur label="Gains nets cumulés" value={`${totalNet.toFixed(2)} €`} />
-        <CarteIndicateur label="En cours de compensation" value={`${totalEnAttente.toFixed(2)} €`} />
+        <CarteIndicateur label="Gains nets cumulés" value={formatMoney(totalNet)} />
+        <CarteIndicateur label="En cours de compensation" value={formatMoney(totalEnAttente)} />
         <CarteIndicateur label="Versements enregistrés" value={String(versements.length)} />
       </div>
       <div className="card">
@@ -45,7 +45,7 @@ export default function GainsVendeur() {
               <div className="font-bold text-sm">Versement {p.status}</div>
               <div className="text-faint text-xs">{p.paid_at || p.scheduled_at || "Date non planifiée"} · {p.provider}</div>
             </div>
-            <div className="font-bold">{Number(p.net_amount || 0).toFixed(2)} {p.currency || "EUR"}</div>
+            <div className="font-bold">{formatMoney(p.net_amount, p.currency || "XAF")}</div>
           </div>
         ))}
       </div>

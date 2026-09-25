@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { livres } from "../lib/donnees";
+import { fetchBooks, formatMoney } from "../lib/api";
 import CouvertureLivre from "../components/ui/CouvertureLivre";
 import { Home, Map, BookMarked, Search } from "lucide-react";
 
 // PAGE : 404 - page introuvable (toute URL non reconnue)
 export default function PageIntrouvable() {
+  const [livres, setLivres] = useState([]);
+  useEffect(() => { fetchBooks().then(setLivres).catch(() => setLivres([])); }, []);
   return (
     <div className="px-4 sm:px-6 lg:px-10 py-12 sm:py-16">
       <div className="max-w-[640px] mx-auto text-center">
@@ -45,7 +47,7 @@ export default function PageIntrouvable() {
               <div className="p-3">
                 <div className="font-head font-bold text-[12.5px] leading-tight">{b.title}</div>
                 <div className="text-faint text-[10.5px] mb-1.5">{b.author}</div>
-                <b className="text-accent text-sm">{b.pricePaper.toFixed(2)} €</b>
+                <b className="text-accent text-sm">{formatMoney(b.pricePaper || b.priceEbook)}</b>
               </div>
             </Link>
           ))}

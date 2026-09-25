@@ -36,6 +36,9 @@ return [
     ],
     'supabase' => [
         'url' => env('SUPABASE_URL'),
+        'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
+        'digital_bucket' => env('SUPABASE_DIGITAL_BUCKET', 'digital-books'),
+        'signed_url_ttl' => env('SUPABASE_SIGNED_URL_TTL', 60),
     ],
     'stripe' => [
         'secret' => env('STRIPE_SECRET'),
@@ -55,8 +58,8 @@ return [
         'merchant_code' => env('ORANGE_MONEY_MERCHANT_CODE'),
     ],
     'camerpay' => [
-    'hmac_secret' => env('CAMPAY_HMAC_SECRET'),
-    'api_token' => env('CAMPAY_API_TOKEN'),
-],
+        'hmac_secret' => env('CAMPAY_HMAC_SECRET'),
+        'api_token' => env('CAMPAY_API_TOKEN'),
+    ],
 
 ];

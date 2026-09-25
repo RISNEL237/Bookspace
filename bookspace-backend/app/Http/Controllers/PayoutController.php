@@ -25,7 +25,7 @@ class PayoutController extends Controller
             ->map(fn (Payout $payout) => [
                 'id' => $payout->id_versement,
                 'net_amount' => $payout->montant,
-                'currency' => 'EUR',
+                'currency' => 'XAF',
                 'status' => $payout->statut === 'effectue' ? 'paid' : 'pending',
                 'provider' => 'manual',
                 'paid_at' => $payout->date_versement,

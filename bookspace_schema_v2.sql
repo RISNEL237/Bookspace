@@ -295,9 +295,9 @@ create table public.ligne_commande (
   -- -> livree -> fond_reverse (chemin normal physique)
   --           -> remboursee (refus vendeur ou délai dépassé)
   -- Pour le numérique : payee -> disponible_telechargement (immédiat)
-  statut_ligne_commande text not null default 'payee'
+  statut_ligne_commande text not null default 'en_attente_paiement'
     check (statut_ligne_commande in (
-      'payee','en_preparation','en_expedition','livree',
+      'en_attente_paiement','payee','en_preparation','en_expedition','livree',
       'fond_reverse','remboursee','disponible_telechargement'
     )),
   -- [AJOUT] date limite légale pour que le vendeur accepte (15 jours,
@@ -328,9 +328,9 @@ create trigger avant_insertion_ligne_commande
 create table public.paiement (
   id_paiement uuid primary key default gen_random_uuid(),
   id_commande uuid not null references public.commande(id_commande) on delete cascade,
-  -- décidé : MTN MoMo + Orange Money + Stripe (carte)
+  -- décidé : PayPal + MTN MoMo + Orange Money
   fournisseur_paiement text not null
-    check (fournisseur_paiement in ('mtn_momo','orange_money','stripe')),
+    check (fournisseur_paiement in ('mtn_momo','orange_money','paypal')),
   tel_paiement text,               -- pertinent si mobile money
   montant_paiement numeric(10,2) not null,
   statut_paiement text not null default 'en_attente'
@@ -495,6 +495,32 @@ insert into public.commission (type_offre, taux) values
   ('physique', 10.0),
   ('numerique', 20.0);
 
+-- ============================================================
+-- 19. LISTE_ENVIES + CHRONIQUE [AJOUT - fonctionnalites front]
+-- ============================================================
+create table public.liste_envies (
+  id uuid primary key default gen_random_uuid(),
+  id_client uuid not null references public.client(id) on delete cascade,
+  id_livre uuid not null references public.livre(id_livre) on delete cascade,
+  date_ajout timestamptz not null default now(),
+  unique (id_client, id_livre)
+);
+
+create table public.chronique (
+  id uuid primary key default gen_random_uuid(),
+  id_vendeur uuid references public.profil_vendeur(id_vendeur) on delete set null,
+  id_livre uuid references public.livre(id_livre) on delete set null,
+  titre text not null,
+  slug text not null unique,
+  resume text,
+  contenu text not null,
+  image text,
+  statut text not null default 'brouillon' check (statut in ('brouillon','publiee','archivee')),
+  date_publication timestamptz,
+  date_creation timestamptz not null default now(),
+  date_modification timestamptz not null default now()
+);
+
 
 -- ============================================================
 -- 19. FONCTIONS UTILITAIRES POUR LA SÉCURITÉ (RLS)
@@ -531,6 +557,8 @@ alter table public.signalement_offre enable row level security;
 alter table public.notification enable row level security;
 alter table public.versement_vendeur enable row level security;
 alter table public.commission enable row level security;
+alter table public.liste_envies enable row level security;
+alter table public.chronique enable row level security;
 
 
 -- ============================================================
@@ -556,7 +584,7 @@ create policy "modification de son propre profil" on public.client
 create policy "lecture publique des vendeurs actifs" on public.profil_vendeur
   for select using (statut_vendeur = 'actif' or id_client = auth.uid() or public.est_admin());
 create policy "creation de sa fiche vendeur" on public.profil_vendeur
-  for insert with check (id_client = auth.uid());
+  for insert with check (public.est_admin());
 create policy "modification de sa fiche vendeur" on public.profil_vendeur
   for update using (id_client = auth.uid() or public.est_admin());
 
@@ -564,7 +592,7 @@ create policy "modification de sa fiche vendeur" on public.profil_vendeur
 create policy "un client voit ses propres demandes" on public.demande_vendeur
   for select using (id_client = auth.uid() or public.est_admin());
 create policy "un client cree sa demande" on public.demande_vendeur
-  for insert with check (id_client = auth.uid());
+  for insert with check (id_client = auth.uid() and statut = 'en_attente');
 create policy "seul l'admin traite les demandes" on public.demande_vendeur
   for update using (public.est_admin());
 
@@ -576,7 +604,13 @@ create policy "seul l'admin gere les categories" on public.categorie
 -- ---- LIVRE ----
 create policy "lecture publique des livres" on public.livre for select using (true);
 create policy "un vendeur cree des fiches livre" on public.livre
-  for insert with check (public.id_vendeur_courant() is not null);
+  for insert with check (
+    cree_par_vendeur = public.id_vendeur_courant()
+    and exists (
+      select 1 from public.profil_vendeur pv
+      where pv.id_vendeur = public.id_vendeur_courant() and pv.statut_vendeur = 'actif'
+    )
+  );
 create policy "seul le createur ou l'admin modifie une fiche livre" on public.livre
   for update using (cree_par_vendeur = public.id_vendeur_courant() or public.est_admin());
 
@@ -584,7 +618,13 @@ create policy "seul le createur ou l'admin modifie une fiche livre" on public.li
 create policy "lecture publique des offres actives" on public.offre
   for select using (statut_offre = 'active' or id_vendeur = public.id_vendeur_courant() or public.est_admin());
 create policy "un vendeur cree ses offres" on public.offre
-  for insert with check (id_vendeur = public.id_vendeur_courant());
+  for insert with check (
+    id_vendeur = public.id_vendeur_courant()
+    and exists (
+      select 1 from public.profil_vendeur pv
+      where pv.id_vendeur = id_vendeur and pv.statut_vendeur = 'actif'
+    )
+  );
 create policy "un vendeur modifie ses offres" on public.offre
   for update using (id_vendeur = public.id_vendeur_courant() or public.est_admin());
 
@@ -719,6 +759,18 @@ create policy "seul l'admin consulte les commissions" on public.commission
   for select using (public.est_admin());
 create policy "seul l'admin modifie les commissions" on public.commission
   for update using (public.est_admin());
+
+-- ---- LISTE_ENVIES ----
+create policy "un client gere sa liste d'envies" on public.liste_envies
+  for all using (id_client = auth.uid()) with check (id_client = auth.uid());
+
+-- ---- CHRONIQUE ----
+create policy "lecture publique des chroniques publiees" on public.chronique
+  for select using (statut = 'publiee' or public.est_admin());
+create policy "un vendeur cree ses chroniques" on public.chronique
+  for insert with check (id_vendeur = public.id_vendeur_courant());
+create policy "un vendeur modifie ses chroniques non publiees" on public.chronique
+  for update using (id_vendeur = public.id_vendeur_courant() and statut <> 'publiee');
 
 -- ============================================================
 -- FIN DU SCRIPT

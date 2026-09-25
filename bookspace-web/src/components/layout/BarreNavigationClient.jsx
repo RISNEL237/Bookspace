@@ -16,7 +16,7 @@ export default function BarreNavigationClient() {
   return (
     <div>
       <div className="bg-accent text-white text-center text-[11.5px] sm:text-[12.5px] font-semibold py-2 px-4">
-        Livraison offerte dès 35 € d'achats en librairie indépendante · Téléchargement ePub & PDF immédiat
+        Catalogue numérique et livres proposés par les vendeurs actifs
       </div>
 
       <div className="bg-surface border-b border-border px-4 sm:px-6 lg:px-10 py-3 lg:py-4 flex items-center gap-3 lg:gap-8">
