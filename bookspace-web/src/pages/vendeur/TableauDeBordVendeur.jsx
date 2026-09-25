@@ -1,6 +1,6 @@
 import { Wallet, Truck, Star, TrendingUp } from "lucide-react";
-import React from "react";
-import { commandesVendeur } from "../../lib/donnees";
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchSellerOrders } from "../../lib/api";
 import { CarteIndicateur } from "../../components/ui/Composants";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 
@@ -10,6 +10,26 @@ const bars = [55, 70, 40, 85, 60, 95, 75];
 const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 export default function TableauDeBordVendeur() {
+  const [commandes, definirCommandes] = useState([]);
+  const [erreur, definirErreur] = useState("");
+
+  useEffect(() => {
+    fetchSellerOrders()
+      .then(definirCommandes)
+      .catch((error) => definirErreur(error.message));
+  }, []);
+
+  const commandesEnCours = commandes.filter((commande) => !["delivered", "paid", "cancelled"].includes(commande.status));
+  const revenus = commandes.reduce((total, commande) => total + Number(commande.unit_price || 0) * Number(commande.quantity || 0), 0);
+  const meilleuresVentes = useMemo(() => {
+    const ventes = new Map();
+    commandes.forEach((commande) => {
+      const titre = commande.book?.title || "Article indisponible";
+      ventes.set(titre, (ventes.get(titre) || 0) + Number(commande.quantity || 0));
+    });
+    return [...ventes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  }, [commandes]);
+
   return (
     <div>
       <div className="flex justify-between items-center bg-surface border border-border rounded p-6 mb-6">
@@ -27,9 +47,9 @@ export default function TableauDeBordVendeur() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-        <CarteIndicateur label="Gains nets du mois" value="1 245 €" delta="↑14%" foot="Versement le 15 du mois" />
-        <CarteIndicateur label="Commandes à expédier" value="4" foot="Action requise" />
-        <CarteIndicateur label="Téléchargements ePub" value="142" foot="Ventes numériques ce mois" />
+        <CarteIndicateur label="Revenus des commandes" value={`${revenus.toFixed(2)} €`} foot="Articles de vos commandes" />
+        <CarteIndicateur label="Commandes à expédier" value={String(commandesEnCours.length)} foot="Données en temps réel" />
+        <CarteIndicateur label="Articles vendus" value={String(commandes.reduce((total, commande) => total + Number(commande.quantity || 0), 0))} foot="Quantités commandées" />
         <CarteIndicateur label="Note boutique" value="4.9 " foot="1 420 avis vérifiés" />
       </div>
 
@@ -54,26 +74,23 @@ export default function TableauDeBordVendeur() {
         </div>
         <div className="flex-1 card">
           <div className="card-title">Meilleures ventes</div>
-          {[
-            ["cv1", "Les Mémoires de l'Ombre", "64 exemplaires"],
-            ["cv5", "Lumières de l'Aube", "38 exemplaires"],
-            ["cv6", "Traité d'Esthétique", "21 exemplaires"],
-          ].map(([cv, t, n]) => (
-            <div key={t} className="flex items-center gap-3 py-2.5 border-b border-border last:border-b-0">
-              <CouvertureLivre cover={cv} className="w-[30px] h-[42px] shrink-0" />
+          {meilleuresVentes.map(([titre, quantite]) => (
+            <div key={titre} className="flex items-center gap-3 py-2.5 border-b border-border last:border-b-0">
+              <CouvertureLivre graine={titre} className="w-[30px] h-[42px] shrink-0" />
               <div>
-                <div className="text-sm font-bold">{t}</div>
-                <div className="text-faint text-xs">{n}</div>
+                <div className="text-sm font-bold">{titre}</div>
+                <div className="text-faint text-xs">{quantite} exemplaire{quantite > 1 ? "s" : ""}</div>
               </div>
             </div>
           ))}
+          {meilleuresVentes.length === 0 && <div className="text-muted text-sm">Aucune vente enregistrée.</div>}
         </div>
       </div>
 
       <div className="card mt-5.5">
         <div className="flex justify-between items-center mb-3.5">
           <div className="card-title mb-0"> Commandes physiques à expédier</div>
-          <span className="pill-danger">4 requises</span>
+          <span className="pill-danger">{commandesEnCours.length} requise{commandesEnCours.length > 1 ? "s" : ""}</span>
         </div>
         <table className="table-base">
           <thead>
@@ -86,14 +103,15 @@ export default function TableauDeBordVendeur() {
             </tr>
           </thead>
           <tbody>
-            {commandesVendeur.map((o) => (
-              <tr key={o.id}>
-                <td className="font-bold">#{o.id}</td>
-                <td>{o.client}</td>
-                <td>{o.title}</td>
-                <td>{o.shipping}</td>
+            {erreur && <tr><td colSpan="5" className="text-danger">{erreur}</td></tr>}
+            {!erreur && commandes.slice(0, 4).map((item) => (
+              <tr key={item.id}>
+                <td className="font-bold">#{item.order_id}</td>
+                <td>{item.order?.client?.full_name || "Client BookSpace"}</td>
+                <td>{item.book?.title || "Article indisponible"}</td>
+                <td>{Number(item.shipping_fee || 0) > 0 ? "Colissimo" : "Click & Collect"}</td>
                 <td>
-                  <span className={`pill-${o.tone}`}>{o.status}</span>
+                  <span className="pill-info">{item.status || "pending"}</span>
                 </td>
               </tr>
             ))}

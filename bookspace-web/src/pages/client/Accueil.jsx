@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { livres } from "../../lib/donnees";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { urlPaysage, urlPortrait } from "../../lib/images";
 import { Etoiles } from "../../components/ui/Composants";
+import { fetchBooks } from "../../lib/api";
 import { Store, Award, Zap, Scale, GraduationCap, Landmark, Palette, Baby, Microscope, Image as ImageIcon, PartyPopper, BookOpenCheck, Building2 } from "lucide-react";
 
 // PAGE : Accueil du site (/)
@@ -26,6 +26,16 @@ const libraires = [
 ];
 
 export default function Accueil() {
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    fetchBooks()
+      .then(setBooks)
+      .catch(() => setBooks([]));
+  }, []);
+
+  const featuredBooks = books.slice(0, 8);
+
   return (
     <div>
       {/* HERO */}
@@ -122,10 +132,10 @@ export default function Accueil() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-          {[...livres, ...livres].slice(0, 8).map((b, i) => (
-            <div key={i} className="card !p-0 overflow-hidden">
+          {featuredBooks.map((b, i) => (
+            <div key={b.id || i} className="card !p-0 overflow-hidden">
               <Link to={`/livre/${b.id}`}>
-                <CouvertureLivre graine={b.id + i} className="rounded-none" />
+                <CouvertureLivre graine={b.id || i} cover={b.cover} className="rounded-none" />
               </Link>
               <div className="p-3.5">
                 <Etoiles rating={b.rating} />
@@ -136,7 +146,7 @@ export default function Accueil() {
                 <div className="flex items-center justify-between">
                   <div className="text-sm">
                     <span className="text-faint text-[10px] block leading-none">dès</span>
-                    <b className="text-accent font-head">{b.priceEbook.toFixed(2)} €</b>
+                    <b className="text-accent font-head">{Number(b.priceEbook || b.pricePaper || 0).toFixed(2)} €</b>
                   </div>
                   <Link to={`/livre/${b.id}`} className="btn-success btn-sm flex items-center gap-1"><Store size={13} /> Offres</Link>
                 </div>

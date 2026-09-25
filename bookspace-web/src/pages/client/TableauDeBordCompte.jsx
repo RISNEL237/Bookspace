@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { commandesClient, bibliothequeNumerique } from "../../lib/donnees";
+import { bibliothequeNumerique } from "../../lib/donnees";
+import { fetchOrders } from "../../lib/api";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { CarteIndicateur } from "../../components/ui/Composants";
 import { BookOpen, Package, BookMarked, Gift, MapPin, ShieldCheck, KeyRound } from "lucide-react";
@@ -8,6 +9,18 @@ import { BookOpen, Package, BookMarked, Gift, MapPin, ShieldCheck, KeyRound } fr
 // PAGE : Vue d'ensemble du compte client (/compte)
 // Résume les commandes en cours et la bibliothèque numérique.
 export default function TableauDeBordCompte() {
+  const [commandes, setCommandes] = useState([]);
+
+  useEffect(() => {
+    fetchOrders().then(setCommandes).catch(() => setCommandes([]));
+  }, []);
+
+  const commandesEnCours = commandes.filter((commande) => !["delivered", "cancelled"].includes(commande.status));
+  const titresNumeriques = commandes.reduce(
+    (total, commande) => total + (commande.items || []).filter((item) => /epub|pdf/i.test(item.format || "")).length,
+    0
+  );
+
   return (
     <div>
       <div className="flex justify-between items-start mb-6">
@@ -24,8 +37,8 @@ export default function TableauDeBordCompte() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <CarteIndicateur label="Commandes en cours" value="3" foot="1 colis en transit" />
-        <CarteIndicateur label="Bibliothèque numérique" value="6" foot="Tatouage ePub sécurisé" />
+        <CarteIndicateur label="Commandes en cours" value={String(commandesEnCours.length)} foot="Suivi depuis votre espace" />
+        <CarteIndicateur label="Bibliothèque numérique" value={String(titresNumeriques)} foot="Titres issus de vos commandes" />
         <CarteIndicateur label="Crédit fidélité" value="12,50 €" foot="Applicable à la prochaine commande" />
       </div>
 
@@ -38,20 +51,24 @@ export default function TableauDeBordCompte() {
                 Voir tout l'historique
               </Link>
             </div>
-            {commandesClient.map((o) => (
+            {commandes.slice(0, 3).map((o) => {
+              const article = o.items?.[0];
+              return (
               <Link
                 key={o.id}
                 to={`/compte/commandes/${o.id}`}
                 className="flex items-center gap-3.5 py-3 border-b border-border last:border-b-0"
               >
-                <CouvertureLivre cover={o.book.cover} className="w-[36px] h-[50px] shrink-0" />
+                <CouvertureLivre graine={article?.book_id || o.id} className="w-[36px] h-[50px] shrink-0" />
                 <div className="flex-1">
-                  <div className="font-bold text-sm">{o.book.title}</div>
-                  <div className="text-faint text-xs">#{o.id} · {o.seller}</div>
+                  <div className="font-bold text-sm">{article?.book?.title || `${o.items?.length || 0} article(s)`}</div>
+                  <div className="text-faint text-xs">#{o.id}</div>
                 </div>
-                <span className={`pill-${o.statusTone}`}>{o.status}</span>
+                <span className="pill-info">{o.status || "pending"}</span>
               </Link>
-            ))}
+              );
+            })}
+            {commandes.length === 0 && <div className="text-muted text-sm">Aucune commande enregistrée pour le moment.</div>}
           </div>
 
           <div className="card">

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { livres, offresPourLivre } from "../../lib/donnees";
+import { fetchBookById } from "../../lib/api";
+import { addToCart } from "../../lib/cart";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { Etoiles, FilAriane } from "../../components/ui/Composants";
 import {
@@ -8,19 +9,82 @@ import {
   ShieldCheck, ChevronRight, Smartphone, Check,
 } from "lucide-react";
 
-// PAGE : Fiche produit (/livre/:id)
-// Présente le LIVRE (fiche bibliographique unique) puis TOUTES les
-// OFFRES des vendeurs qui le proposent (prix, format, localisation,
-// avis) — un même livre peut être vendu par plusieurs librairies.
-// Le client compare et choisit son vendeur avant d'ajouter au panier.
 const onglets = ["Résumé & Synopsis", "Spécifications", "Avis Lecteurs"];
 
 export default function FicheProduit() {
   const { id } = useParams();
-  const book = livres.find((b) => b.id === id) || livres[0];
-  const offres = offresPourLivre(book.id);
+  const [book, setBook] = useState(null);
   const [filtreFormat, setFiltreFormat] = useState("tous");
   const [onglet, definirOnglet] = useState(0);
+
+  useEffect(() => {
+    if (!id) return;
+
+    fetchBookById(id)
+      .then(setBook)
+      .catch(() => setBook(null));
+  }, [id]);
+
+  if (!book) {
+    return (
+      <div className="px-4 py-12 text-center text-muted">
+        Chargement du livre…
+      </div>
+    );
+  }
+
+  const offres = book.offers.length > 0
+    ? book.offers.map((offer) => ({
+        id: offer.id,
+        type: offer.type === "numerique" ? "numerique" : "papier",
+        prix: offer.price,
+        vendeur: offer.seller?.name || book.seller,
+        ville: offer.seller?.city || book.sellerCity,
+        sellerId: offer.sellerId || book.sellerId,
+        note: book.rating,
+        avis: book.reviews,
+        delai: offer.type === "numerique" ? "Téléchargement immédiat" : "2 à 4 jours",
+      }))
+    : [
+        {
+          id: `${book.id}-paper`,
+          type: "papier",
+          prix: Number(book.pricePaper || 0),
+          vendeur: book.seller,
+          ville: book.sellerCity,
+          sellerId: book.sellerId,
+          note: book.rating,
+          avis: book.reviews,
+          delai: "2 à 4 jours",
+        },
+        {
+          id: `${book.id}-ebook`,
+          type: "numerique",
+          prix: Number(book.priceEbook || 0),
+          vendeur: book.seller,
+          ville: book.sellerCity,
+          sellerId: book.sellerId,
+          note: book.rating,
+          avis: book.reviews,
+          delai: "Téléchargement immédiat",
+        },
+      ].filter((offre) => offre.prix > 0);
+
+  const handleAddToCart = (offer) => {
+    addToCart({
+      id: book.id,
+      offerId: offer.id,
+      title: book.title,
+      author: book.author,
+      seller: offer.vendeur,
+      sellerId: book.sellerId,
+      format: offer.type === "papier" ? "Livre broché" : "E-pub / PDF",
+      qty: 1,
+      price: Number(offer.prix),
+      shipping: offer.type === "papier" ? 3.5 : 0,
+      cover: book.cover,
+    });
+  };
 
   const offresFiltrees = offres.filter((o) => filtreFormat === "tous" || o.type === filtreFormat);
   const meilleurPrix = Math.min(...offres.map((o) => o.prix));
@@ -30,13 +94,12 @@ export default function FicheProduit() {
       <FilAriane items={[{ label: "Accueil", to: "/" }, { label: book.genre, to: "/catalogue" }, { label: book.title }]} />
 
       <div className="flex flex-col lg:flex-row gap-8 px-4 sm:px-6 lg:px-10 pt-6">
-        {/* Colonne image + infos livre */}
         <div className="w-full lg:w-[300px] shrink-0">
           <div className="relative">
             <button className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
               <Heart size={16} />
             </button>
-            <CouvertureLivre graine={book.id} className="w-full" ratio="3/4" />
+            <CouvertureLivre graine={book.id} cover={book.cover} className="w-full" ratio="3/4" />
           </div>
           <div className="flex gap-2.5 mt-3">
             <button className="btn-outline btn-sm flex-1 flex items-center justify-center gap-1.5"><BookOpen size={13} /> Extrait</button>
@@ -44,7 +107,6 @@ export default function FicheProduit() {
           </div>
         </div>
 
-        {/* Colonne fiche livre + liste d'offres */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="pill-muted">{book.genre?.toUpperCase()}</span>
@@ -97,7 +159,9 @@ export default function FicheProduit() {
                 </div>
                 <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
                   <div className="font-head text-xl font-extrabold">{o.prix.toFixed(2)} €</div>
-                  <button className="btn-accent btn-sm">Ajouter au panier</button>
+                  <button onClick={() => handleAddToCart(o)} className="btn-accent btn-sm">
+                    Ajouter au panier
+                  </button>
                 </div>
               </div>
             ))}
@@ -115,7 +179,6 @@ export default function FicheProduit() {
         </div>
       </div>
 
-      {/* Onglets */}
       <div className="flex gap-6 border-b border-border mx-4 sm:mx-6 lg:mx-10 mt-9 text-sm overflow-x-auto">
         {onglets.map((t, i) => (
           <button key={t} onClick={() => definirOnglet(i)} className={`py-3 font-bold whitespace-nowrap ${i === onglet ? "text-ink border-b-2 border-accent" : "text-faint"}`}>
@@ -136,24 +199,6 @@ export default function FicheProduit() {
           </div>
         )}
         {onglet === 2 && <div className="text-muted text-sm">{book.reviews} avis vérifiés — sélectionnez un vendeur ci-dessus pour consulter ses avis spécifiques.</div>}
-      </div>
-
-      {/* Suggestions */}
-      <div className="px-4 sm:px-6 lg:px-10 pb-12">
-        <div className="section-title text-lg mb-4">Complétez votre bibliothèque</div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {livres.filter((b) => b.id !== book.id).slice(0, 4).map((b) => (
-            <Link key={b.id} to={`/livre/${b.id}`} className="card !p-0 overflow-hidden">
-              <CouvertureLivre graine={b.id} className="rounded-none" />
-              <div className="p-3">
-                <Etoiles rating={b.rating} />
-                <div className="font-head font-bold text-[12.5px] mt-1 leading-tight">{b.title}</div>
-                <div className="text-faint text-[10.5px] mb-1.5">{b.author}</div>
-                <b className="text-accent text-sm">dès {b.pricePaper.toFixed(2)} €</b>
-              </div>
-            </Link>
-          ))}
-        </div>
       </div>
     </div>
   );

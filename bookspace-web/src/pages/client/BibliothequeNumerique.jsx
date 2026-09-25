@@ -1,11 +1,26 @@
 import { Search as SearchIcn, Cloud, Download, BookOpen, ShieldCheck, Smartphone } from "lucide-react";
-import React from "react";
-import { bibliothequeNumerique } from "../../lib/donnees";
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchDigitalLibrary } from "../../lib/api";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 
 // PAGE : Bibliothèque numérique (/compte/bibliotheque)
 // Liste des e-books déjà achetés, prêts au téléchargement.
 export default function BibliothequeNumerique() {
+  const [livres, definirLivres] = useState([]);
+  const [recherche, definirRecherche] = useState("");
+  const [erreur, definirErreur] = useState("");
+
+  useEffect(() => {
+    fetchDigitalLibrary()
+      .then(definirLivres)
+      .catch((error) => definirErreur(error.message));
+  }, []);
+
+  const livresFiltres = useMemo(
+    () => livres.filter((livre) => `${livre.title} ${livre.author}`.toLowerCase().includes(recherche.toLowerCase())),
+    [livres, recherche]
+  );
+
   return (
     <div>
       <div className="flex justify-between items-start mb-1">
@@ -23,7 +38,7 @@ export default function BibliothequeNumerique() {
       </div>
 
       <div className="flex gap-3 my-5">
-        <input className="input flex-1" placeholder="Rechercher dans mes livres..." />
+        <input value={recherche} onChange={(event) => definirRecherche(event.target.value)} className="input flex-1" placeholder="Rechercher dans mes livres..." />
         <select className="input w-auto">
           <option>Tous les formats</option>
           <option>ePub</option>
@@ -37,20 +52,22 @@ export default function BibliothequeNumerique() {
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
         <div className="flex-1 space-y-4 w-full">
-          {bibliothequeNumerique.map((b) => (
+          {erreur && <div className="text-danger text-sm">{erreur}</div>}
+          {!erreur && livresFiltres.length === 0 && <div className="text-muted text-sm">Aucun livre numérique disponible.</div>}
+          {livresFiltres.map((b) => (
             <div key={b.id} className="bg-surface border border-border rounded p-4 flex gap-4">
-              <CouvertureLivre cover={b.cover} className="w-14 h-20 shrink-0" tag={b.format} />
+              <CouvertureLivre graine={b.id} cover={b.cover} className="w-14 h-20 shrink-0" tag={b.format} />
               <div className="flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="pill-muted mb-1.5 inline-block">{b.seller}</span>
+                    <span className="pill-muted mb-1.5 inline-block">{b.seller || "BookSpace"}</span>
                     <div className="font-head font-bold">{b.title}</div>
                     <div className="text-muted text-sm">{b.author}</div>
                   </div>
                   <span className="pill-success">Prêt</span>
                 </div>
                 <div className="text-faint text-xs mt-1.5 mb-3">
-                  Acheté le {b.purchased} · Format {b.format} ({b.size})
+                  Acheté le {b.purchased ? new Date(b.purchased).toLocaleDateString("fr-FR") : "-"} · Format {b.format}
                 </div>
                 <div className="flex gap-2.5">
                   <button className="btn-primary btn-sm"><Download size={13} className="inline mr-1"/> Télécharger</button>

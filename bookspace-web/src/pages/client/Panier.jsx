@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { articlesPanier as articlesInitiaux } from "../../lib/donnees";
+import { getCartItems, removeCartItem, updateCartItemQuantity } from "../../lib/cart";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { FilAriane } from "../../components/ui/Composants";
 import { Package, Wifi, Gift, Bookmark, Trash2, Plus, Minus, Truck, ShieldCheck, BookOpen, Lock, Tag, Smartphone } from "lucide-react";
@@ -9,21 +9,27 @@ import { Package, Wifi, Gift, Bookmark, Trash2, Plus, Minus, Truck, ShieldCheck,
 // Regroupe les articles papier et numériques avant paiement.
 // Quantités et suppression sont réellement interactives (état local).
 export default function Panier() {
-  const [articles, setArticles] = useState(articlesInitiaux);
+  const [articles, setArticles] = useState(() => getCartItems());
   const [livraison, definirLivraison] = useState("collect");
   const [codePromo, setCodePromo] = useState("");
 
-  function changerQuantite(id, delta) {
-    setArticles((liste) =>
-      liste.map((a) => (a.id === id ? { ...a, qty: Math.max(1, a.qty + delta) } : a))
-    );
-  }
-  function supprimer(id) {
-    setArticles((liste) => liste.filter((a) => a.id !== id));
+  useEffect(() => {
+    const next = getCartItems();
+    setArticles(next);
+  }, []);
+
+  function changerQuantite(id, format, delta) {
+    const next = updateCartItemQuantity(id, format, delta);
+    setArticles(next);
   }
 
-  const sousTotal = articles.reduce((s, i) => s + i.price * i.qty, 0);
-  const fraisPort = livraison === "collect" ? 0 : articles.reduce((s, i) => s + i.shipping, 0);
+  function supprimer(id, format) {
+    const next = removeCartItem(id, format);
+    setArticles(next);
+  }
+
+  const sousTotal = articles.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1), 0);
+  const fraisPort = livraison === "collect" ? 0 : articles.reduce((s, i) => s + Number(i.shipping || 0), 0);
   const total = sousTotal + fraisPort;
 
   if (articles.length === 0) {
@@ -60,9 +66,9 @@ export default function Panier() {
       <div className="flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
         <div className="flex-[1.6] space-y-4">
           {articles.map((item) => {
-            const numerique = item.format.includes("E-pub");
+            const numerique = String(item.format || "").toLowerCase().includes("epub") || String(item.format || "").toLowerCase().includes("pdf");
             return (
-              <div key={item.id} className="card flex flex-col sm:flex-row gap-4">
+              <div key={`${item.id}-${item.format}`} className="card flex flex-col sm:flex-row gap-4">
                 <CouvertureLivre graine={item.id} className="w-full sm:w-[90px] shrink-0" />
                 <div className="flex-1">
                   <div className="flex justify-between items-start gap-2">
@@ -93,11 +99,11 @@ export default function Panier() {
                   <div className="flex flex-wrap justify-between items-center gap-2 mt-3.5">
                     {!numerique ? (
                       <div className="flex items-center border border-borderStrong rounded-[7px] overflow-hidden text-xs">
-                        <button onClick={() => changerQuantite(item.id, -1)} className="w-7 h-7 flex items-center justify-center text-muted hover:bg-surfaceAlt">
+                        <button onClick={() => changerQuantite(item.id, item.format, -1)} className="w-7 h-7 flex items-center justify-center text-muted hover:bg-surfaceAlt">
                           <Minus size={12} />
                         </button>
                         <span className="w-8 text-center font-bold">{item.qty}</span>
-                        <button onClick={() => changerQuantite(item.id, 1)} className="w-7 h-7 flex items-center justify-center text-muted hover:bg-surfaceAlt">
+                        <button onClick={() => changerQuantite(item.id, item.format, 1)} className="w-7 h-7 flex items-center justify-center text-muted hover:bg-surfaceAlt">
                           <Plus size={12} />
                         </button>
                       </div>
@@ -106,7 +112,7 @@ export default function Panier() {
                     )}
                     <div className="flex gap-4 text-xs text-muted font-semibold">
                       <button className="flex items-center gap-1.5"><Bookmark size={13} /> Mettre de côté</button>
-                      <button onClick={() => supprimer(item.id)} className="flex items-center gap-1.5 text-danger">
+                      <button onClick={() => supprimer(item.id, item.format)} className="flex items-center gap-1.5 text-danger">
                         <Trash2 size={13} /> Supprimer
                       </button>
                     </div>

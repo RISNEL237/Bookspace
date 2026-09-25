@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchSellers } from "../../lib/api";
 import { Search, Navigation, MapPin, Star, Clock, Map } from "lucide-react";
 
 // PAGE : Carte des librairies (/librairies) — NOUVELLE PAGE
 // Permet au client de localiser les libraires proposant une offre,
 // en complément de la comparaison sur la fiche produit.
-const librairiesDemo = [
-  { id: "delamain", nom: "Librairie Delamain", ville: "Paris 1er", adresse: "155 Rue Saint-Honoré, 75001", note: 4.9, avis: 340, titres: "14 200", ouverture: "Ouvert jusqu'à 19h30" },
-  { id: "odeon", nom: "Librairie de l'Odéon", ville: "Paris 6e", adresse: "12 rue de l'Odéon, 75006", note: 4.7, avis: 210, titres: "9 850", ouverture: "Ouvert jusqu'à 20h00" },
-  { id: "volcans", nom: "Librairie Les Volcans", ville: "Clermont-Ferrand", adresse: "80 boulevard François-Mitterrand", note: 4.9, avis: 890, titres: "45 000", ouverture: "Ferme à 19h00" },
-  { id: "passages", nom: "Librairie Passages", ville: "Lyon 2e", adresse: "11 rue de Brest, 69002", note: 4.7, avis: 430, titres: "18 400", ouverture: "Ouvert jusqu'à 19h00" },
-];
-
 export default function CarteLibrairies() {
   const [recherche, setRecherche] = useState("Paris");
-  const [selection, setSelection] = useState(librairiesDemo[0].id);
+  const [librairies, setLibrairies] = useState([]);
+  const [selection, setSelection] = useState("");
+  const [erreur, setErreur] = useState("");
+
+  useEffect(() => {
+    fetchSellers()
+      .then((vendeurs) => {
+        setLibrairies(vendeurs);
+        setSelection(vendeurs[0]?.id || "");
+      })
+      .catch((error) => setErreur(error.message));
+  }, []);
+
+  const librairiesFiltrees = librairies.filter((librairie) =>
+    `${librairie.name} ${librairie.city} ${librairie.country}`.toLowerCase().includes(recherche.toLowerCase())
+  );
+  const librairieSelectionnee = librairies.find((librairie) => librairie.id === selection);
 
   return (
     <div>
@@ -37,21 +47,22 @@ export default function CarteLibrairies() {
 
       <div className="flex flex-col lg:flex-row gap-5 px-4 sm:px-6 lg:px-10 pb-10">
         <div className="w-full lg:w-[380px] shrink-0 space-y-3">
-          <div className="text-xs text-faint font-bold">{librairiesDemo.length} librairies trouvées</div>
-          {librairiesDemo.map((l) => (
+          {erreur && <div className="text-danger text-sm">{erreur}</div>}
+          {!erreur && <div className="text-xs text-faint font-bold">{librairiesFiltrees.length} librairies trouvées</div>}
+          {librairiesFiltrees.map((l) => (
             <button
               key={l.id}
               onClick={() => setSelection(l.id)}
               className={`card w-full text-left !p-4 ${selection === l.id ? "border-accent bg-accent-pale" : ""}`}
             >
               <div className="flex justify-between items-start">
-                <div className="font-bold text-sm">{l.nom}</div>
-                <span className="pill-success shrink-0">{l.ouverture}</span>
+                <div className="font-bold text-sm">{l.name}</div>
+                <span className="pill-success shrink-0">Vendeur approuvé</span>
               </div>
-              <div className="text-muted text-xs flex items-center gap-1.5 mt-1"><MapPin size={12} /> {l.adresse}, {l.ville}</div>
+              <div className="text-muted text-xs flex items-center gap-1.5 mt-1"><MapPin size={12} /> {l.city}, {l.country}</div>
               <div className="flex items-center gap-3 text-xs mt-2">
-                <span className="flex items-center gap-1 text-warning"><Star size={12} fill="currentColor" /> {l.note} ({l.avis})</span>
-                <span className="text-faint">{l.titres} titres disponibles</span>
+                <span className="flex items-center gap-1 text-warning"><Star size={12} fill="currentColor" /> {l.rating.toFixed(1)}</span>
+                <span className="text-faint">{l.books.length} titres disponibles</span>
               </div>
               <Link to={`/librairie/${l.id}`} className="text-accent-dark text-xs font-bold mt-2 inline-block">Voir la vitrine →</Link>
             </button>
@@ -64,7 +75,7 @@ export default function CarteLibrairies() {
           <div className="font-bold text-sm mb-1">Carte interactive</div>
           <div className="text-muted text-xs max-w-[280px]">
             Emplacement réservé pour l'intégration d'une carte (Google Maps /
-            Mapbox) — librairie sélectionnée : <b>{librairiesDemo.find((l) => l.id === selection)?.nom}</b>
+            Mapbox) — librairie sélectionnée : <b>{librairieSelectionnee?.name || "Aucune"}</b>
           </div>
         </div>
       </div>

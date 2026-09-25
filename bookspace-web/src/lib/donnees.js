@@ -13,20 +13,6 @@
 // Laravel. Cela évitera une double traduction inutile.
 // ============================================================
 
-// Liste des identifiants de couverture disponibles (styles de fond)
-export const couvertures = ["cv1", "cv2", "cv3", "cv4", "cv5", "cv6"];
-
-// Dégradés de couleur associés à chaque identifiant de couverture
-// (utilisé par le composant CouvertureLivre pour simuler une jaquette)
-export const stylesCouvertures = {
-  cv1: "from-[#3B4B41] to-[#26332C]",
-  cv2: "from-[#5C7DA0] to-[#3D5876]",
-  cv3: "from-[#B98A2E] to-[#8E6A1F]",
-  cv4: "from-[#5A7D63] to-[#3F5A47]",
-  cv5: "from-[#8A5A56] to-[#6B413D]",
-  cv6: "from-[#6B6350] to-[#4A4434]",
-};
-
 // ------------------------------------------------------------
 // Catalogue principal des livres (papier + numérique)
 // ------------------------------------------------------------
@@ -137,57 +123,6 @@ export const livres = [
   },
 ];
 
-// ------------------------------------------------------------
-// Contenu du panier d'achat (page Panier + Paiement)
-// On réutilise un livre du catalogue (...livres[0]) et on ajoute
-// les infos propres à la ligne de panier : format choisi, quantité,
-// prix retenu et frais de port.
-// ------------------------------------------------------------
-export const articlesPanier = [
-  {
-    ...livres[0],
-    format: "Livre broché",
-    qty: 1,
-    price: 19.99,
-    shipping: 3.5,
-  },
-  {
-    ...livres[1],
-    format: "E-pub — instantané",
-    qty: 1,
-    price: 9.99,
-    shipping: 0,
-  },
-];
-
-// Historique des commandes du client connecté (espace "Mon compte")
-export const commandesClient = [
-  {
-    id: "CMD-2025-0841",
-    book: livres[0],
-    date: "Aujourd'hui, 09:30",
-    seller: "Librairie Delamain, Paris",
-    status: "En préparation",
-    statusTone: "warning",
-  },
-  {
-    id: "CMD-2025-0792",
-    book: livres[5],
-    date: "12 février 2025",
-    seller: "Atelier Typographique Voltaire, Genève",
-    status: "Expédié",
-    statusTone: "info",
-  },
-  {
-    id: "CMD-2025-0610",
-    book: livres[2],
-    date: "28 janvier 2025",
-    seller: "Librairie de l'Odéon, Paris",
-    status: "Livré",
-    statusTone: "success",
-  },
-];
-
 // Livres numériques déjà achetés par le client (page Bibliothèque numérique)
 export const bibliothequeNumerique = [
   { ...livres[0], format: "ePub", size: "3.2 Mo", purchased: "14 Fév. 2025" },
@@ -237,21 +172,6 @@ export const offres = [
   { id: "off-5", idLivre: "archipel-songes", vendeur: "Éditions Horizon Bleu", ville: "Distribution directe", lat: 48.87, lng: 2.35, note: 4.5, avis: 940, type: "numerique", prix: 11.99, stock: true, delai: "Téléchargement immédiat" },
   { id: "off-6", idLivre: "archipel-songes", vendeur: "Librairie Delamain", ville: "Paris 1er", lat: 48.8656, lng: 2.3376, note: 4.9, avis: 340, type: "papier", prix: 22.0, stock: true, delai: "Click & Collect 1h" },
 ];
-
-// Renvoie toutes les offres valides pour un livre. Si aucune offre
-// dédiée n'existe encore dans les données de démonstration, on
-// reconstruit une offre unique à partir des infos du livre lui-même
-// (pour que chaque fiche produit du catalogue reste fonctionnelle).
-export function offresPourLivre(idLivre) {
-  const trouvees = offres.filter((o) => o.idLivre === idLivre);
-  if (trouvees.length > 0) return trouvees;
-  const livre = livres.find((l) => l.id === idLivre);
-  if (!livre) return [];
-  return [
-    { id: `off-${idLivre}-papier`, idLivre, vendeur: livre.seller, ville: livre.sellerCity, lat: 48.8566, lng: 2.3522, note: livre.rating, avis: livre.reviews, type: "papier", prix: livre.pricePaper, stock: true, delai: "Colissimo 48h" },
-    { id: `off-${idLivre}-numerique`, idLivre, vendeur: livre.seller, ville: livre.sellerCity, lat: 48.8566, lng: 2.3522, note: livre.rating, avis: livre.reviews, type: "numerique", prix: livre.priceEbook, stock: true, delai: "Téléchargement immédiat" },
-  ];
-}
 
 export const commandesVendeur = [
   { id: "CMD-0841", client: "É. de Montalembert", title: "Les Mémoires de l'Ombre", shipping: "Colissimo", status: "En attente", tone: "warning" },

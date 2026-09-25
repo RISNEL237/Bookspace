@@ -1,12 +1,31 @@
 import { Truck } from "lucide-react";
-import React, { useState } from "react";
-import { commandesVendeur } from "../../lib/donnees";
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchSellerOrders } from "../../lib/api";
 
 // PAGE : Commandes à expédier (/vendeur/commandes)
-const tabs = ["Toutes (4)", "Colissimo (3)", "Click & Collect (1)"];
-
 export default function CommandesVendeur() {
   const [onglet, definirOnglet] = useState(0);
+  const [commandes, definirCommandes] = useState([]);
+  const [erreur, definirErreur] = useState("");
+
+  useEffect(() => {
+    fetchSellerOrders()
+      .then(definirCommandes)
+      .catch((error) => definirErreur(error.message));
+  }, []);
+
+  const tabs = useMemo(() => [
+    `Toutes (${commandes.length})`,
+    `Colissimo (${commandes.filter((commande) => Number(commande.shipping_fee || 0) > 0).length})`,
+    `Click & Collect (${commandes.filter((commande) => Number(commande.shipping_fee || 0) === 0).length})`,
+  ], [commandes]);
+
+  const commandesFiltrees = commandes.filter((commande) => {
+    if (onglet === 1) return Number(commande.shipping_fee || 0) > 0;
+    if (onglet === 2) return Number(commande.shipping_fee || 0) === 0;
+    return true;
+  });
+
   return (
     <div>
       <div className="section-title mb-5">Commandes à expédier</div>
@@ -25,6 +44,8 @@ export default function CommandesVendeur() {
             ))}
           </div>
         </div>
+        {erreur && <div className="text-danger text-sm mb-4">{erreur}</div>}
+        {!erreur && commandes.length === 0 && <div className="text-muted text-sm mb-4">Aucune commande à traiter.</div>}
         <table className="table-base">
           <thead>
             <tr>
@@ -37,13 +58,13 @@ export default function CommandesVendeur() {
             </tr>
           </thead>
           <tbody>
-            {commandesVendeur.map((o) => (
-              <tr key={o.id}>
-                <td className="font-bold">#{o.id}</td>
-                <td>{o.client}</td>
-                <td>{o.title}</td>
-                <td>{o.shipping}</td>
-                <td><span className={`pill-${o.tone}`}>{o.status}</span></td>
+            {commandesFiltrees.map((item) => (
+              <tr key={item.id}>
+                <td className="font-bold">#{item.order_id}</td>
+                <td>{item.order?.client?.full_name || "Client BookSpace"}</td>
+                <td>{item.book?.title || "Article indisponible"}</td>
+                <td>{Number(item.shipping_fee || 0) > 0 ? "Colissimo" : "Click & Collect"}</td>
+                <td><span className="pill-info">{item.status || "pending"}</span></td>
                 <td><button className="btn-outline btn-sm">Traiter</button></td>
               </tr>
             ))}

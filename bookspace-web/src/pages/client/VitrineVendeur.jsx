@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { livres } from "../../lib/donnees";
+import { fetchSellerById } from "../../lib/api";
 import { CarteLivreGrille } from "../../components/livres/CartesLivres";
 import { FilAriane } from "../../components/ui/Composants";
 import { urlPaysage, urlPortrait } from "../../lib/images";
@@ -10,8 +10,18 @@ import { Store, Clock, Truck, Percent, ShieldCheck, MapPin, Phone, Heart } from 
 // Présente une librairie/éditeur et son catalogue.
 export default function VitrineVendeur() {
   const { id } = useParams();
-  const nomVendeur = "Librairie Delamain";
-  const livresVendeur = livres.filter((b) => b.seller === nomVendeur || !id);
+  const [vendeur, setVendeur] = useState(null);
+  const [erreur, setErreur] = useState("");
+
+  useEffect(() => {
+    fetchSellerById(id).then(setVendeur).catch((error) => setErreur(error.message));
+  }, [id]);
+
+  if (erreur) return <div className="px-4 sm:px-6 lg:px-10 py-10 text-danger">{erreur}</div>;
+  if (!vendeur) return <div className="px-4 sm:px-6 lg:px-10 py-10 text-muted">Chargement de la librairie…</div>;
+
+  const nomVendeur = vendeur.name;
+  const livresVendeur = vendeur.books;
 
   return (
     <div>
@@ -28,17 +38,17 @@ export default function VitrineVendeur() {
           <img src={urlPortrait("librairie-delamain-logo", 110)} alt="" className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-4 border-surface object-cover shrink-0" />
           <div className="flex-1 bg-surface sm:bg-transparent rounded-lg p-2">
             <div className="font-head text-xl sm:text-2xl font-extrabold">{nomVendeur}</div>
-            <div className="text-muted text-sm flex items-center gap-1.5 mt-1"><MapPin size={13} /> 155 Rue Saint-Honoré, 75001 Paris</div>
+            <div className="text-muted text-sm flex items-center gap-1.5 mt-1"><MapPin size={13} /> {vendeur.city}, {vendeur.country}</div>
           </div>
           <button className="btn-outline flex items-center gap-1.5"><Heart size={15} /> Suivre</button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
           {[
-            [Store, "412", "Titres au catalogue"],
+              [Store, String(livresVendeur.length), "Titres au catalogue"],
             [Percent, "100%", "Marge locale reversée"],
             [Clock, "1700", "Année de fondation"],
-            [ShieldCheck, "4.9★", "Note vérifiée"],
+              [ShieldCheck, `${vendeur.rating.toFixed(1)}★`, "Note vérifiée"],
           ].map(([Icone, v, l]) => (
             <div key={l} className="card text-center !p-4">
               <Icone size={18} className="mx-auto text-accent mb-1.5" />

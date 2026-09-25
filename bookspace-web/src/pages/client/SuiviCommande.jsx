@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { commandesClient } from "../../lib/donnees";
+import { fetchOrderById } from "../../lib/api";
 import { FilAriane } from "../../components/ui/Composants";
 import { Package, Truck, Home, CheckCircle2, Map, Phone } from "lucide-react";
 
@@ -15,7 +15,26 @@ const steps = [
 
 export default function SuiviCommande() {
   const { id } = useParams();
-  const order = commandesClient.find((o) => o.id === id) || commandesClient[0];
+  const [order, setOrder] = useState(null);
+  const [erreur, setErreur] = useState("");
+
+  useEffect(() => {
+    fetchOrderById(id)
+      .then(setOrder)
+      .catch((error) => setErreur(error.message));
+  }, [id]);
+
+  if (erreur) {
+    return <div className="px-4 sm:px-6 lg:px-10 py-10 text-danger">{erreur}</div>;
+  }
+
+  if (!order) {
+    return <div className="px-4 sm:px-6 lg:px-10 py-10 text-muted">Chargement de la commande…</div>;
+  }
+
+  const premierArticle = order.items?.[0];
+  const titre = premierArticle?.book?.title || `${order.items?.length || 0} article(s)`;
+  const vendeur = premierArticle?.seller?.shop_name || "Vendeur BookSpace";
 
   return (
     <div>
@@ -27,7 +46,7 @@ export default function SuiviCommande() {
             <span className="pill-info">En transit</span>
           </div>
           <div className="text-muted text-sm mb-5">
-            {order.book.title} — Livre broché · Expédié par {order.seller}
+            {titre} · Expédié par {vendeur}
           </div>
 
           <div className="card">

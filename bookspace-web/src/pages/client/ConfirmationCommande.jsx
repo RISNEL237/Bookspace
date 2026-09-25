@@ -1,6 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { articlesPanier } from "../../lib/donnees";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { clearCart, getCartItems } from "../../lib/cart";
+import { fetchMobileMoneyStatus, fetchOrderById } from "../../lib/api";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { CheckCircle2, FileText, Printer, BookOpen, QrCode, MapPin, Smartphone, Download, PiggyBank } from "lucide-react";
 
@@ -9,9 +10,54 @@ import { CheckCircle2, FileText, Printer, BookOpen, QrCode, MapPin, Smartphone, 
 // papier (retrait) / numérique (accès immédiat) et la transparence
 // financière de la transaction.
 export default function ConfirmationCommande() {
-  const total = articlesPanier.reduce((s, i) => s + i.price * i.qty + i.shipping, 0);
-  const papier = articlesPanier.filter((a) => !a.format.includes("E-pub"));
-  const numerique = articlesPanier.filter((a) => a.format.includes("E-pub"));
+  const location = useLocation();
+  const [commande, setCommande] = useState(() => location.state?.commande || null);
+  const paiement = location.state?.paiement || null;
+  const [statutPaiement, setStatutPaiement] = useState(paiement?.status || location.state?.commande?.status || "pending");
+  const [articles, setArticles] = useState(() => getCartItems());
+
+  useEffect(() => {
+    const snapshot = getCartItems();
+    setArticles(snapshot);
+    clearCart();
+
+    const orderId = new URLSearchParams(location.search).get("order_id");
+    if (orderId && !commande) {
+      fetchOrderById(orderId)
+        .then((order) => {
+          setCommande(order);
+          setStatutPaiement(order.status || "pending");
+        })
+        .catch(() => {});
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!paiement?.reference || !commande?.id || statutPaiement !== "pending") {
+      return undefined;
+    }
+
+    let actif = true;
+    const verifier = async () => {
+      try {
+        const resultat = await fetchMobileMoneyStatus(commande.id, paiement.reference);
+        if (actif) setStatutPaiement(resultat.status);
+      } catch {
+        // Le prochain contrôle pourra récupérer une réponse du fournisseur.
+      }
+    };
+
+    verifier();
+    const intervalle = window.setInterval(verifier, 5000);
+    return () => {
+      actif = false;
+      window.clearInterval(intervalle);
+    };
+  }, [commande?.id, paiement?.reference, statutPaiement]);
+
+  const total = articles.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1) + Number(i.shipping || 0), 0);
+  const papier = articles.filter((a) => !String(a.format || "").toLowerCase().includes("epub") && !String(a.format || "").toLowerCase().includes("pdf"));
+  const numerique = articles.filter((a) => String(a.format || "").toLowerCase().includes("epub") || String(a.format || "").toLowerCase().includes("pdf"));
 
   return (
     <div className="px-4 sm:px-6 lg:px-10 py-8">
@@ -29,10 +75,10 @@ export default function ConfirmationCommande() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-xs">
-          <div className="card !p-3.5"><div className="text-faint mb-1">Référence</div><b>#CMD-2025-0842</b></div>
-          <div className="card !p-3.5"><div className="text-faint mb-1">Date</div><b>Aujourd'hui</b></div>
+          <div className="card !p-3.5"><div className="text-faint mb-1">Référence</div><b>#{commande?.id || "En attente"}</b></div>
+          <div className="card !p-3.5"><div className="text-faint mb-1">Date</div><b>{commande?.created_at ? new Date(commande.created_at).toLocaleDateString("fr-FR") : "Aujourd'hui"}</b></div>
           <div className="card !p-3.5"><div className="text-faint mb-1">Notification</div><b className="truncate block">Par e-mail</b></div>
-          <div className="card !p-3.5"><div className="text-faint mb-1">Total réglé</div><b className="text-accent">{total.toFixed(2)} €</b></div>
+          <div className="card !p-3.5"><div className="text-faint mb-1">Statut du paiement</div><b className={statutPaiement === "paid" ? "text-success" : "text-warning"}>{statutPaiement === "pending" ? "En attente" : statutPaiement === "paid" ? "Payé" : statutPaiement}</b></div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">

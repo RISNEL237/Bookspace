@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabaseClient";
 import { BookOpen, Store, PenLine, Mail, Lock, Eye, EyeOff, ShieldCheck, Library, Building2 } from "lucide-react";
 
 // PAGE : Connexion / Inscription (/login)
@@ -14,6 +15,37 @@ export default function Connexion() {
   const [espace, setEspace] = useState("lecteur");
   const [onglet, setOnglet] = useState("connexion");
   const [voirMdp, setVoirMdp] = useState(false);
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [motDePasse, setMotDePasse] = useState("");
+  const [erreur, setErreur] = useState("");
+  const [chargement, setChargement] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  async function soumettre(event) {
+    event.preventDefault();
+    setErreur("");
+    setChargement(true);
+
+    const resultat = onglet === "connexion"
+      ? await supabase.auth.signInWithPassword({ email, password: motDePasse })
+      : await supabase.auth.signUp({ email, password: motDePasse, options: { data: { full_name: nom } } });
+
+    setChargement(false);
+
+    if (resultat.error) {
+      setErreur(resultat.error.message);
+      return;
+    }
+
+    if (onglet === "inscription" && !resultat.data.session) {
+      setErreur("Compte créé. Vérifiez votre adresse e-mail avant de vous connecter.");
+      return;
+    }
+
+    navigate(location.state?.retour || "/compte");
+  }
 
   return (
     <div className="min-h-screen bg-bg py-6 sm:py-10 px-4 sm:px-6">
@@ -43,7 +75,7 @@ export default function Connexion() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-5">
-          <div className="flex-1 card">
+          <form onSubmit={soumettre} className="flex-1 card">
             <div className="flex gap-6 border-b border-border mb-6 text-sm font-bold">
               <button onClick={() => setOnglet("connexion")} className={`pb-3 ${onglet === "connexion" ? "text-ink border-b-2 border-accent" : "text-faint"}`}>Se connecter</button>
               <button onClick={() => setOnglet("inscription")} className={`pb-3 ${onglet === "inscription" ? "text-ink border-b-2 border-accent" : "text-faint"}`}>Créer un compte</button>
@@ -59,21 +91,21 @@ export default function Connexion() {
             {onglet === "inscription" && (
               <div className="field">
                 <label>Nom complet</label>
-                <input className="input" placeholder="Votre nom et prénom" />
+                <input className="input" placeholder="Votre nom et prénom" value={nom} onChange={(event) => setNom(event.target.value)} required />
               </div>
             )}
             <div className="field">
               <label>Adresse e-mail</label>
               <div className="input flex items-center gap-2">
                 <Mail size={15} className="text-faint shrink-0" />
-                <input type="email" placeholder="vous@exemple.fr" className="flex-1 outline-none bg-transparent" />
+                <input type="email" placeholder="vous@exemple.fr" className="flex-1 outline-none bg-transparent" value={email} onChange={(event) => setEmail(event.target.value)} required />
               </div>
             </div>
             <div className="field">
               <label>Mot de passe</label>
               <div className="input flex items-center gap-2">
                 <Lock size={15} className="text-faint shrink-0" />
-                <input type={voirMdp ? "text" : "password"} placeholder="••••••••••" className="flex-1 outline-none bg-transparent" />
+                <input type={voirMdp ? "text" : "password"} placeholder="••••••••••" className="flex-1 outline-none bg-transparent" value={motDePasse} onChange={(event) => setMotDePasse(event.target.value)} minLength={6} required />
                 <button type="button" onClick={() => setVoirMdp((v) => !v)} className="text-faint shrink-0">
                   {voirMdp ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -87,16 +119,17 @@ export default function Connexion() {
               </div>
             )}
 
-            <Link to={espace === "lecteur" ? "/compte" : espace === "libraire" ? "/vendeur" : "/vendeur/inscription"} className="btn-accent w-full py-3.5">
-              {onglet === "connexion" ? "Accéder à mon espace BookSpace" : "Créer mon compte"} →
-            </Link>
+            {erreur && <div className="bg-danger-bg text-danger rounded-lg p-3 mb-4 text-sm">{erreur}</div>}
+            <button type="submit" disabled={chargement} className="btn-accent w-full py-3.5 disabled:opacity-60">
+              {chargement ? "Connexion en cours…" : onglet === "connexion" ? "Accéder à mon espace BookSpace" : "Créer mon compte"} →
+            </button>
 
             {espace === "libraire" && onglet === "inscription" && (
               <div className="text-faint text-[11px] text-center mt-3">
                 Votre demande sera soumise à vérification (KYB) avant activation.
               </div>
             )}
-          </div>
+          </form>
 
           <div className="w-full lg:w-[320px] shrink-0 bg-primary rounded-lg p-6 sm:p-7 text-white flex flex-col justify-between">
             <img src="/logo-icon.png" alt="BookSpace" className="h-14 w-auto mb-5" />

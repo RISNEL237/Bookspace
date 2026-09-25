@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
-import { livres } from "../../lib/donnees";
+import React, { useState, useMemo, useEffect } from "react";
 import { CarteLivreResultat } from "../../components/livres/CartesLivres";
 import { FilAriane } from "../../components/ui/Composants";
-import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { fetchBooks } from "../../lib/api";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 
 // PAGE : Catalogue (/catalogue)
 // Liste des livres avec filtres réellement fonctionnels (format,
@@ -10,18 +10,27 @@ import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 const rayons = ["Tous", "Roman historique", "Roman contemporain", "Philosophie", "Poésie", "Essai"];
 
 export default function Catalogue() {
+  const [books, setBooks] = useState([]);
   const [recherche, setRecherche] = useState("");
   const [rayon, setRayon] = useState("Tous");
   const [formats, setFormats] = useState({ papier: true, numerique: true });
   const [filtresOuverts, setFiltresOuverts] = useState(false);
 
+  useEffect(() => {
+    fetchBooks().then(setBooks).catch(() => setBooks([]));
+  }, []);
+
   const resultats = useMemo(() => {
-    return livres.filter((l) => {
+    return books.filter((l) => {
       const matchTexte = (l.title + l.author).toLowerCase().includes(recherche.toLowerCase());
       const matchRayon = rayon === "Tous" || l.genre === rayon;
-      return matchTexte && matchRayon;
+      const matchFormat =
+        (formats.papier && Number(l.pricePaper ?? 0) > 0) ||
+        (formats.numerique && Number(l.priceEbook ?? 0) > 0);
+
+      return matchTexte && matchRayon && matchFormat;
     });
-  }, [recherche, rayon]);
+  }, [books, recherche, rayon, formats]);
 
   function basculerFormat(cle) {
     setFormats((f) => ({ ...f, [cle]: !f[cle] }));

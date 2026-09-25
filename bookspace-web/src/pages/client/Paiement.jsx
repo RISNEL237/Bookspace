@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { articlesPanier } from "../../lib/donnees";
+import { getCartItems } from "../../lib/cart";
+import { createCheckoutSession, createMobileMoneyPayment, createOrder } from "../../lib/api";
+import { supabase } from "../../lib/supabaseClient";
 import CouvertureLivre from "../../components/ui/CouvertureLivre";
 import { CreditCard, Smartphone, Fingerprint, Lock, ArrowLeftRight } from "lucide-react";
 
@@ -17,7 +19,49 @@ const methodes = [
 export default function Paiement() {
   const navigate = useNavigate();
   const [methode, definirMethode] = useState("carte");
-  const total = articlesPanier.reduce((s, i) => s + i.price * i.qty, 0) + articlesPanier.reduce((s, i) => s + i.shipping, 0);
+  const [erreur, definirErreur] = useState("");
+  const [envoi, definirEnvoi] = useState(false);
+  const [telephone, definirTelephone] = useState("");
+  const articles = getCartItems();
+  const total = articles.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 1), 0) + articles.reduce((s, i) => s + Number(i.shipping || 0), 0);
+
+  async function confirmerPaiement() {
+    definirErreur("");
+    definirEnvoi(true);
+
+    try {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        navigate("/login", { state: { retour: "/paiement" } });
+        return;
+      }
+
+      if (articles.some((article) => !article.sellerId)) {
+        throw new Error("Un vendeur est manquant pour un article du panier.");
+      }
+
+      const fournisseur = methode === "mtn" ? "mtn_momo" : methode === "om" ? "orange_money" : "stripe";
+      const commande = await createOrder(articles, fournisseur, telephone || null);
+      if (["mtn", "om"].includes(methode)) {
+        const paiement = await createMobileMoneyPayment(commande.id, methode === "mtn" ? "mtn" : "orange", telephone);
+        navigate("/commande/confirmation", { state: { commande, paiement } });
+        return;
+      }
+
+      const session = await createCheckoutSession(commande.id);
+
+      if (!session.url) {
+        throw new Error("Stripe n'a pas retourné de page de paiement.");
+      }
+
+      window.location.assign(session.url);
+    } catch (error) {
+      definirErreur(error.message || "Le paiement n'a pas pu être confirmé.");
+    } finally {
+      definirEnvoi(false);
+    }
+  }
 
   return (
     <div>
@@ -58,27 +102,27 @@ export default function Paiement() {
               <>
                 <div className="field">
                   <label>Nom du titulaire de la carte</label>
-                  <input className="input" defaultValue="Éléonore de Montalembert" />
+                  <input className="input" placeholder="Votre nom complet" />
                 </div>
                 <div className="field">
                   <label>Numéro de carte bancaire</label>
-                  <input className="input" defaultValue="4532 •••• •••• 8824" />
+                  <input className="input" inputMode="numeric" placeholder="Saisi directement sur Stripe" disabled />
                 </div>
                 <div className="flex gap-4">
                   <div className="field flex-1">
                     <label>Date d'expiration (MM/AA)</label>
-                    <input className="input" defaultValue="09 / 28" />
+                    <input className="input" placeholder="Saisi directement sur Stripe" disabled />
                   </div>
                   <div className="field flex-1">
                     <label>Code de sécurité</label>
-                    <input className="input" defaultValue="•••" />
+                    <input className="input" placeholder="Saisi directement sur Stripe" disabled />
                   </div>
                 </div>
               </>
             ) : (
               <div className="field">
                 <label>Numéro de téléphone {methode === "mtn" ? "MTN MoMo" : methode === "om" ? "Orange Money" : ""}</label>
-                <input className="input" placeholder="+237 6 XX XX XX XX" />
+                <input className="input" placeholder="+237 6 XX XX XX XX" value={telephone} onChange={(event) => definirTelephone(event.target.value)} required />
                 <div className="text-faint text-[11.5px] mt-2">
                   Vous recevrez une notification de confirmation sur votre téléphone pour valider le paiement.
                 </div>
@@ -103,7 +147,8 @@ export default function Paiement() {
             </div>
           </div>
 
-          <button onClick={() => navigate("/commande/confirmation")} className="btn-accent w-full py-4">
+          {erreur && <div className="bg-danger-bg text-danger rounded-lg p-3 mb-4 text-sm">{erreur}</div>}
+          <button onClick={confirmerPaiement} disabled={envoi || articles.length === 0} className="btn-accent w-full py-4 disabled:opacity-60">
             <Lock size={15} className="inline mr-1.5 -mt-0.5" /> Confirmer et Payer {total.toFixed(2)} €
           </button>
           <div className="flex flex-wrap gap-2.5 mt-4 justify-center">
@@ -151,9 +196,9 @@ export default function Paiement() {
           </div>
 
           <div className="card mt-4.5">
-            <div className="card-title text-sm">Récapitulatif des Articles ({articlesPanier.length})</div>
-            {articlesPanier.map((it) => (
-              <div key={it.id} className="flex gap-3 items-center py-2.5 border-b border-border last:border-b-0">
+            <div className="card-title text-sm">Récapitulatif des Articles ({articles.length})</div>
+            {articles.map((it) => (
+              <div key={`${it.id}-${it.format}`} className="flex gap-3 items-center py-2.5 border-b border-border last:border-b-0">
                 <CouvertureLivre graine={it.id} className="w-[34px] h-[46px] shrink-0" />
                 <div className="flex-1">
                   <div className="text-sm font-bold">{it.title}</div>
