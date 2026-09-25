@@ -29,7 +29,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-
 # Laravel doit utiliser /public comme DocumentRoot
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
@@ -53,16 +52,22 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# On copie d'abord les fichiers de dépendances
 COPY composer.json composer.lock ./
 
+# Ajout de --no-scripts pour éviter que Laravel ne cherche le fichier 'artisan' qui n'est pas encore là
 RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-scripts
 
-
+# Maintenant on copie le reste du projet (y compris le fichier artisan)
 COPY . .
+
+# On lance les scripts post-installation puisque tous les fichiers sont présents
+RUN php artisan package:discover --ansi
 
 
 # --------------------------------------------------
