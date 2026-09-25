@@ -24,6 +24,7 @@ Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/sellers', [SellerController::class, 'index']);
 Route::get('/sellers/{seller}', [SellerController::class, 'show']);
 Route::post('/payments/stripe/webhook', [PaymentController::class, 'stripeWebhook']);
+Route::post('/payments/camerpay/webhook', [PaymentController::class, 'camerpayWebhook']);
 
 /*
 |--------------------------------------------------------------------------

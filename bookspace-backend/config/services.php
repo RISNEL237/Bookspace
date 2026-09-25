@@ -54,5 +54,9 @@ return [
         'client_secret' => env('ORANGE_MONEY_CLIENT_SECRET'),
         'merchant_code' => env('ORANGE_MONEY_MERCHANT_CODE'),
     ],
+    'camerpay' => [
+    'hmac_secret' => env('CAMPAY_HMAC_SECRET'),
+    'api_token' => env('CAMPAY_API_TOKEN'),
+],
 
 ];

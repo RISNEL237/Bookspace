@@ -229,4 +229,45 @@ class PaymentController extends Controller
             'provider_status' => $providerStatus,
         ]);
     }
+    public function camerpayWebhook(Request $request){
+        $hmacSecret = config('services.camerpay.hmac_secret');
+        $apiToken = config('services.camerpay.api_token');
+
+        if (! $hmacSecret || ! $apiToken) {
+            return response()->json(['message' => 'CamerPay n’est pas encore configuré sur le serveur.'], 503);
+        }
+
+        $signature = $request->header('X-CamerPay-Signature');
+        $payload = $request->getContent();
+        $expectedSignature = hash_hmac('sha256', $payload, $hmacSecret);
+
+        if (! hash_equals($expectedSignature, $signature)) {
+            return response()->json(['message' => 'Signature CamerPay invalide.'], 400);
+        }
+
+        $event = json_decode($payload, true);
+        if (($event['type'] ?? null) === 'payment.completed') {
+            $orderId = $event['data']['metadata']['order_id'] ?? null;
+            if ($orderId && ($order = Order::find($orderId))) {
+                $order->update(['statut_commande' => 'payee']);
+                Payment::where('id_commande', $order->id_commande)->update([
+                    'statut_paiement' => 'succes',
+                    'id_transaction_externe' => $event['data']['id'] ?? null,
+                ]);
+                $order->items()->each(function ($item) {
+                    $item->update([
+                        'statut_ligne_commande' => $item->offer?->type_offre === 'numerique'
+                            ? 'disponible_telechargement'
+                            : 'en_preparation',
+                    ]);
+                });
+            }
+        }
+
+        return response()->json(['received' => true]);
+    }
+    // Vérification de la signature HMAC
+    // Vérification du paiement
+    // Mise à jour de la commande
+    // Réponse à CamerPay
 }
