@@ -13,6 +13,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/books/{book}/reviews', [ReviewController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/sellers', [SellerController::class, 'index']);
 Route::get('/sellers/{seller}', [SellerController::class, 'show']);
@@ -76,6 +78,7 @@ Route::middleware('supabase.auth')->group(function () {
     });
     // Le client peut créer et consulter ses commandes. Leur statut
     // est piloté uniquement par les callbacks de paiement et les flux métier.
+    Route::post('/orders/{order}/reviews', [ReviewController::class, 'store']);
     Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
     Route::post('/orders/{order}/confirm-delivery', [OrderController::class, 'confirmDelivery']);
     Route::post('/orders/{order}/checkout-session', [PaymentController::class, 'checkout']);
